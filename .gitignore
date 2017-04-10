@@ -1,3 +1,7 @@
+# Own rules
+*.err
+# /Own rules
+
 # Created by https://www.gitignore.io/api/node
 
 ### Node ###
