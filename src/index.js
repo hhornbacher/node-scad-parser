@@ -98,7 +98,7 @@ if (!module.parent) {
   try {
     parser = new SCADParser();
     const ast = parser.getAST('../examples/ex4.scad');
-    console.log(inspectObject(ast[0], false));
+    console.log(ast.toString());
   } catch (error) {
     console.log(error);
   }

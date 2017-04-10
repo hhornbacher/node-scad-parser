@@ -10,7 +10,6 @@ function Entities(registerClass) {
             }, privateProps);
 
             if (_.isArray(children)) {
-                children = children.trim();
                 privateProps._children = children;
             }
 
