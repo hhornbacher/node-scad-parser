@@ -1,0 +1,22 @@
+{
+  "name": "scad-parser",
+  "version": "1.0.0",
+  "description": "Module to parse the abstract syntax tree of OpenSCAD files",
+  "main": "./src/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "OpenSCAD",
+    "scad",
+    "AST",
+    "parser",
+    "3d"
+  ],
+  "author": "Harry Hornbacher <harry@harry-hornbacher.de>",
+  "license": "Apache-2.0",
+  "dependencies": {
+    "lodash": "^4.17.4",
+    "nearley": "^2.8.0"
+  }
+}
