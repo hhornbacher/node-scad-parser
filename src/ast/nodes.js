@@ -210,23 +210,12 @@ function Nodes(registerClass) {
 
     require('./values')(registerClass);
 
-    class ExpressionNode extends Node {
-        constructor(terms) {
-            super(terms);
-        }
-    }
-    registerClass(ExpressionNode);
-
     class TermNode extends Node {
         constructor(factors) {
             super(factors);
         }
     }
     registerClass(TermNode);
-
-    class FactorNode extends ValueNode {
-    }
-    registerClass(FactorNode);
 
     class ParameterListNode extends Node {
         constructor(parameters, standardValuesAllowed = false) {
@@ -246,13 +235,6 @@ function Nodes(registerClass) {
         }
     }
     registerClass(ForLoopParameterListNode);
-
-    class ParameterNode extends ExpressionNode {
-        constructor(value) {
-            super([value]);
-        }
-    }
-    registerClass(ParameterNode);
 };
 
 module.exports = Nodes;
