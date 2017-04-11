@@ -1,6 +1,6 @@
 const _ = require('lodash');
 
-function Entities(registerClass) {
+function Nodes(registerClass) {
 
     class Node extends SCADBaseClass {
         constructor(children, privateProps = {}) {
@@ -43,14 +43,36 @@ function Entities(registerClass) {
             return _.find(this.children, (child) => child.isType(type));
         }
 
+        indentToString(count) {
+            return _.times(count * 2, () => ' ').join('');
+        }
+
+        childrenToString(children, indentCount = 0) {
+            let indent = this.indentToString(indentCount)
+            if (_.isString(children)) {
+                if (/\n/.test(children))
+                    return children.replace('\n', '\n' + indent) + indent;
+                else
+                    return children.toString();
+            }
+            else if (_.isArray(children))
+                return '\n' + indent + _.map(children, child => child.toString({ indent: indentCount + 1 }) + '\n' + indent).join('');
+
+            return children.toString();
+        }
+
+        paramsToString(params) {
+            return _.map(params, (val, name) => ' ' + name + '="' + val + '"').join('');
+        }
+
         toString(options) {
             options = _.merge({
-                indent:0,
+                indent: 0,
                 params: {},
                 children: []
             }, options);
-            const indentString = _.times(options.indent * 2, () => ' ');
-            return `${indentString}<${this.className}${_.map(options.params, (val, name) => ' ' + name + '="' + val + '"')}>\n${indentString}${_.map(options.children, child => child.toString({ indent: options.indent + 1 }) + '\n' + indentString)}</${this.className}>`;
+            let indent = this.indentToString(options.indent);
+            return `${indent}<${this.className}${this.paramsToString(options.params)}>${this.childrenToString(options.children, options.indent)}</${this.className}>`;
         }
     }
     registerClass(Node);
@@ -78,10 +100,17 @@ function Entities(registerClass) {
 
     class CommentNode extends Node {
         constructor(text, multiline = false) {
+            if (!multiline)
+                text.replace('\n', '');
             super(null, {
                 _text: text,
                 _multiline: multiline
             });
+        }
+
+        toString(options) {
+            const indent = this.indentToString(options.indent);
+            return super.toString({ children: this.text, indent: _.isObject(options) && options.indent ? options.indent : 0 })
         }
     }
     registerClass(CommentNode);
@@ -92,14 +121,17 @@ function Entities(registerClass) {
                 _name: name,
                 _value: value
             });
-            value._parent = this;
         }
 
         toString(options) {
-            return super.toString({ params: { 
-                name: this.name,
-                value: this.value 
-            }, indent: _.isObject(options) ? options.indent : 0 })
+            return super.toString({
+                children: this.value,
+                params: {
+                    name: this.name,
+                    type: this.value.className
+                },
+                indent: _.isObject(options) && options.indent ? options.indent : 0
+            })
         }
     }
     registerClass(VariableNode);
@@ -168,78 +200,20 @@ function Entities(registerClass) {
     registerClass(ActionNode);
 
     class ValueNode extends Node {
-        constructor(value = null, negative = false, privateProps = {}) {
-            super(null, _.merge({
+        constructor(value = null, negative = false, privateProps = {}, children = null) {
+            super(children, _.merge({
                 _value: value,
                 _negative: negative
             }, privateProps));
         }
 
         toString() {
-            return `${this.negative?'- ':''}${this.value.toString()}`;
+            return `${this.negative ? '- ' : ''}${this.value.toString()}`;
         }
     }
     registerClass(ValueNode);
 
-    class NumberValue extends ValueNode {
-        constructor(value, negative = false) {
-            super(value, negative);
-        }
-    }
-    registerClass(NumberValue);
-
-    class BooleanValue extends ValueNode {
-        constructor(value) {
-            super(value);
-        }
-    }
-    registerClass(BooleanValue);
-
-    class StringValue extends ValueNode {
-        constructor(value) {
-            super(value);
-        }
-
-        toString() {
-            return `'${this.value.toString()}'`;
-        }
-    }
-    registerClass(StringValue);
-
-    class VectorValue extends ValueNode {
-        constructor(value, negative = false) {
-            super(value, negative);
-        }
-
-        toString() {
-            return `${this.negative?'- ':''}[${_.map(this.value, val => val.value ? val.value.toString() : val.toString()).join(', ')}]`;
-        }
-    }
-    registerClass(VectorValue);
-
-    class RangeValue extends VectorValue {
-        constructor(start, end, increment = 1) {
-            super([start, end, increment]);
-        }
-
-        get start() { return this.children[0]; }
-        get end() { return this.children[1]; }
-        get increment() { return this.children[2]; }
-    }
-    registerClass(RangeValue);
-
-    class ReferenceValue extends ValueNode {
-        constructor(reference, negative = false) {
-            super(null, negative, {
-                _reference: reference
-            });
-        }
-
-        toString() {
-            return `${this.negative?'- ':''}${this.reference}`;
-        }
-    }
-    registerClass(ReferenceValue);
+    require('./values')(registerClass);
 
     class ExpressionNode extends Node {
         constructor(terms) {
@@ -286,4 +260,4 @@ function Entities(registerClass) {
     registerClass(ParameterNode);
 };
 
-module.exports = Entities;
+module.exports = Nodes;
