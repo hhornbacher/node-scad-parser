@@ -12,16 +12,28 @@ Variable -> Name WhiteSpace:?  "=" WhiteSpace:? ValueNode {% d => new VariableNo
 
 ValueNode ->
 	NumberValue  {% d => d[0] %}
-    | ReferenceValue {% d => d[0] %}
-    | StringValue {% d => d[0] %}
 	| VectorValue {% d => d[0] %}
+    | RangeValue {% d => d[0] %}
+    | StringValue {% d => d[0] %}
+    | ReferenceValue {% d => d[0] %}
 
 StringValue ->
     "\"" [^"]:+ "\"" {% d => new StringValue(_.flattenDeep(d[1]).join('')) %}
 
 ReferenceValue -> 
-    Name {% d => new ReferenceValue(d[0], false) %}
+    Name {% d => {
+		if(d[0] === 'true')
+			return new BooleanValue(true);
+		else if(d[0] === 'false')
+			return new BooleanValue(false);
+		else
+			return new ReferenceValue(d[0], false);
+	} %}
     | "-" WhiteSpace:? Name {% d => new ReferenceValue(d[2], true) %}
+
+RangeValue ->
+	"[" WhiteSpace:? ValueNode WhiteSpace:? ":" WhiteSpace:? ValueNode WhiteSpace:? "]"  {% d => new RangeValue(d[2], d[6]) %}
+	| "[" WhiteSpace:? ValueNode WhiteSpace:? ":" WhiteSpace:? ValueNode WhiteSpace:? ":" WhiteSpace:? ValueNode WhiteSpace:? "]"  {% d => new RangeValue(d[2], d[10], d[6]) %}
 
 VectorValue ->
 	"[" WhiteSpace:? VectorList WhiteSpace:? "]"  {% d => new VectorValue(d[2], false) %}
@@ -43,7 +55,6 @@ Float ->
 Integer ->
 	[0-9] {% d => d[0] %}
 	| Integer [0-9] {% d => d[0] + d[1] %}
-
 	
 Name ->
 	[A-Za-z_$] {% d => d[0] %}

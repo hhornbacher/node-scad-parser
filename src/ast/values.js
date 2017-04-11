@@ -42,14 +42,18 @@ function Values(registerClass) {
     }
     registerClass(VectorValue);
 
-    class RangeValue extends VectorValue {
-        constructor(start, end, increment = 1) {
-            super([start, end, increment]);
+    class RangeValue extends ValueNode {
+        constructor(start, end, increment = new NumberValue(1)) {
+            super(null, false,{
+                _start: start,
+                _end: end,
+                _increment: increment
+            });
         }
 
-        get start() { return this.children[0]; }
-        get end() { return this.children[1]; }
-        get increment() { return this.children[2]; }
+        toString() {
+            return `[${this.start.toString()}:${this.increment.toString()}:${this.end.toString()}]`;
+        }
     }
     registerClass(RangeValue);
 
