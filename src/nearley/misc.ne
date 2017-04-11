@@ -1,3 +1,6 @@
+EndOfStatement ->
+	_  ";" _
+
 _ -> WhiteSpace:?
 __ -> WhiteSpace
  

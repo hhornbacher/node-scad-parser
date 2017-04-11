@@ -142,6 +142,15 @@ function Nodes(registerClass) {
                 _file: file
             });
         }
+
+        toString(options) {
+            return super.toString({
+                params: {
+                    file: this.file
+                },
+                indent: _.isObject(options) && options.indent ? options.indent : 0
+            })
+        }
     }
     registerClass(IncludeNode);
 
@@ -198,20 +207,6 @@ function Nodes(registerClass) {
         }
     }
     registerClass(ActionNode);
-
-    class ValueNode extends Node {
-        constructor(value = null, negative = false, privateProps = {}, children = null) {
-            super(children, _.merge({
-                _value: value,
-                _negative: negative
-            }, privateProps));
-        }
-
-        toString() {
-            return `${this.negative ? '- ' : ''}${this.value.toString()}`;
-        }
-    }
-    registerClass(ValueNode);
 
     require('./values')(registerClass);
 

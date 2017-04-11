@@ -2,6 +2,20 @@ const _ = require('lodash');
 
 function Values(registerClass) {
 
+    class ValueNode extends Node {
+        constructor(value = null, negative = false, privateProps = {}, children = null) {
+            super(children, _.merge({
+                _value: value,
+                _negative: negative
+            }, privateProps));
+        }
+
+        toString() {
+            return `${this.negative ? '- ' : ''}${this.value.toString()}`;
+        }
+    }
+    registerClass(ValueNode);
+
     class NumberValue extends ValueNode {
         constructor(value, negative = false) {
             super(value, negative);

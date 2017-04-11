@@ -6,6 +6,7 @@ function id(x) {return x[0]; }
     require('../ast');
 var grammar = {
     ParserRules: [
+    {"name": "EndOfStatement", "symbols": ["_", {"literal":";"}, "_"]},
     {"name": "_$ebnf$1", "symbols": ["WhiteSpace"], "postprocess": id},
     {"name": "_$ebnf$1", "symbols": [], "postprocess": function(d) {return null;}},
     {"name": "_", "symbols": ["_$ebnf$1"]},
@@ -47,9 +48,17 @@ var grammar = {
     {"name": "RootNode$ebnf$1$subexpression$1", "symbols": ["StatementNode"]},
     {"name": "RootNode$ebnf$1", "symbols": ["RootNode$ebnf$1", "RootNode$ebnf$1$subexpression$1"], "postprocess": function arrpush(d) {return d[0].concat([d[1]]);}},
     {"name": "RootNode", "symbols": ["RootNode$ebnf$1"], "postprocess": d => new RootNode(_.flattenDeep(d))},
-    {"name": "StatementNode", "symbols": ["VariableNode", "_", {"literal":";"}, "_"], "postprocess": d => d[0]},
+    {"name": "StatementNode", "symbols": ["VariableNode", "EndOfStatement"], "postprocess": d => d[0]},
+    {"name": "StatementNode", "symbols": ["IncludeNode", "EndOfStatement"], "postprocess": d => d[0]},
     {"name": "StatementNode", "symbols": ["Comment", "_"], "postprocess": d => d[0]},
     {"name": "VariableNode", "symbols": ["Name", "_", {"literal":"="}, "_", "ValueNode"], "postprocess": d => new VariableNode(d[0], d[4])},
+    {"name": "IncludeNode$string$1", "symbols": [{"literal":"i"}, {"literal":"n"}, {"literal":"c"}, {"literal":"l"}, {"literal":"u"}, {"literal":"d"}, {"literal":"e"}, {"literal":" "}, {"literal":"<"}], "postprocess": function joiner(d) {return d.join('');}},
+    {"name": "IncludeNode", "symbols": ["IncludeNode$string$1", "Path", {"literal":">"}], "postprocess": d => new IncludeNode(d[1])},
+    {"name": "IncludeNode$string$2", "symbols": [{"literal":"u"}, {"literal":"s"}, {"literal":"e"}, {"literal":" "}, {"literal":"<"}], "postprocess": function joiner(d) {return d.join('');}},
+    {"name": "IncludeNode", "symbols": ["IncludeNode$string$2", "Path", {"literal":">"}], "postprocess": d => new UseNode(d[1])},
+    {"name": "Path$ebnf$1", "symbols": [/[^>]/]},
+    {"name": "Path$ebnf$1", "symbols": ["Path$ebnf$1", /[^>]/], "postprocess": function arrpush(d) {return d[0].concat([d[1]]);}},
+    {"name": "Path", "symbols": ["Path$ebnf$1"], "postprocess": d => d[0].join('')},
     {"name": "Name", "symbols": [/[A-Za-z_$]/], "postprocess": d => d[0]},
     {"name": "Name", "symbols": ["Name", /[A-Za-z0-9_]/], "postprocess": d => d[0] + d[1]},
     {"name": "Comment$string$1", "symbols": [{"literal":"/"}, {"literal":"/"}], "postprocess": function joiner(d) {return d.join('');}},
