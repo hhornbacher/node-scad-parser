@@ -16,25 +16,92 @@
 %}
  
 @builtin "whitespace.ne"
-#@include "./misc.ne"
-#@include "./values.ne"  
 
-RootNode -> Body {% id %}
+RootNode -> 
+	Block
 
-Body ->
+Block ->
 	null
-	| Statement Body
+	| Statement Block
 
 Statement ->
 	";"
-	| "{" Body "}"
-	| Identifier _ "=" _ Expression _ ";"
+	| "//" [^\n]:* "\n"
+#	| %tok_include _ "<" Path ">" _ ";"
+#	| %tok_use _ "<" Path ">" _ ";"
+	| ModuleInstantiation
+	| "{" Block "}"
+	| Identifier _ "=" _ Expression _ ";" _
 	| %tok_module __ Identifier _ "(" _ Parameters _ ")" _ Statement __
 	| %tok_function __ Identifier _ "(" _ Parameters _ ")" _ "=" _ Expression __
+
+
+ModuleInstantiation ->
+	SingleModuleInstantiation _ ";"
+	| SingleModuleInstantiation ChildrenInstantiation
+
+ModuleInstantiationList ->
+	null
+	| ModuleInstantiationList ModuleInstantiation
+
+ChildrenInstantiation ->
+	ModuleInstantiation
+	| "{" ModuleInstantiationList "}"
+
+SingleModuleInstantiation ->
+	Identifier _ "(" _ Arguments _ ")" _
+	| Identifier ":" __ SingleModuleInstantiation
+	| "!" SingleModuleInstantiation
+	| "#" SingleModuleInstantiation
+	| "%" SingleModuleInstantiation
+	| "*" SingleModuleInstantiation
 
 Expression ->
 	%tok_true {% id %}
 	| %tok_false {% id %}
+	| Identifier
+	| Expression "." Identifier
+	| String
+	| Float
+	| "(" _ Expression _ ")"
+	| "[" _ Expression _ ":" _ Expression _ "]"
+	| "[" _ Expression _ ":" _ Expression _ ":" _ Expression _ "]"
+	| "[" _ VectorExpression _ "]"
+	| Expression _ "*" _ Expression
+	| Expression _ "/" _ Expression
+	| Expression _ "%" _ Expression
+	| Expression _ "+" _ Expression
+	| Expression _ "-" _ Expression
+	| Expression _ "<" _ Expression
+	| Expression _ "<=" _ Expression
+	| Expression _ "==" _ Expression
+	| Expression _ "!=" _ Expression
+	| Expression _ ">=" _ Expression
+	| Expression _ ">" _ Expression
+	| Expression _ "&&" _ Expression
+	| Expression _ "||" _ Expression
+	| "+" _ Expression
+	| "-" _ Expression
+	| "!" _ Expression
+	| Expression _ "?" _ Expression _ ":" _ Expression
+	| Expression _ "[" _ Expression _ "]"
+	| Identifier _ "(" _ Arguments _ ")"
+
+
+String ->
+	"\"" [^"\n]:* "\""
+
+Float ->
+	Integer
+	| Integer "." Integer {% d => d[0] + d[1] + d[2] %}
+
+Integer ->
+	[0-9] {% d => d[0] %}
+	| Integer [0-9] {% d => d[0] + d[1] %}
+
+VectorExpression ->
+	Expression
+	| VectorExpression _ "," _ Expression
 
 Parameters ->
 	null
@@ -54,37 +121,9 @@ Argument ->
 	Expression
 	| Identifier _ "=" _ Expression
 
+Path ->
+	[^>]:+  {% d => d[0].join('') %}
+
 Identifier ->
 	[A-Za-z_$] {% d => d[0] %}
 	| Identifier [A-Za-z0-9_] {% d => d[0] + d[1] %}
-
-#BlockNode -> "{" _ (StatementNode):* _ "}" {% d => new BlockNode(_.flattenDeep(d[2])) %}
-
-#StatementNode ->
-#	VariableNode EndOfStatement  {% d => d[0] %}
-#	| IncludeNode EndOfStatement {% d => d[0] %}
-#	| Comment _  {% d => d[0] %}
-
-#VariableNode -> 
-#	Name _  "=" _ TermNode {% d => new VariableNode(d[0], d[4]) %}
-#	| Name _  "=" _ ValueNode {% d => new VariableNode(d[0], d[4]) %}
-
-#IncludeNode ->
-#	%tok_include _ "<" Path ">"  {% d => new IncludeNode(d[1]) %}
-#	| %tok_use _ "<" Path ">"  {% d => new UseNode(d[1]) %}
-
-#TermNode -> 
-#	"(" _ TermNode _ ")"  {% d => d[2] %}
-#	| ValueNode Operator ValueNode {% d => new TermNode([d[0],d[2]], d[1]) %}
-#	| TermNode Operator TermNode {% d => new TermNode([d[0],d[2]], d[1]) %}
-
-#Expression ->
-#	"true"
-#	| "false"
-#	| "undef"
-
-#Operator -> _ [-+*/] _   {% d => d[1] %}
-
-#Path ->
-#	[^>]:+ {% d => d[0].join('') %}
-
