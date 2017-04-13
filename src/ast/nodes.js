@@ -5,7 +5,6 @@ function Nodes(registerClass) {
     class Node extends SCADBaseClass {
         constructor(children, privateProps = {}) {
             privateProps = _.merge({
-                /*_location: new Location(),*/
                 parent: null
             }, privateProps);
 
@@ -160,23 +159,21 @@ function Nodes(registerClass) {
 
     class ModuleNode extends Node {
         constructor(name, params, block) {
-            let privateProps = {
+            super(null, {
                 _name: name,
                 _block: block,
                 _params: params
-            };
-            super(null, privateProps);
+            });
         }
     }
     registerClass(ModuleNode);
 
     class ForLoopNode extends Node {
         constructor(params, block) {
-            let privateProps = {
+            super(null, {
                 _block: block,
                 _params: params
-            };
-            super(null, privateProps);
+            });
         }
     }
     registerClass(ForLoopNode);
@@ -211,8 +208,19 @@ function Nodes(registerClass) {
     require('./values')(registerClass);
 
     class TermNode extends Node {
-        constructor(factors) {
-            super(factors);
+        constructor(terms, operator = null, negative = false) {
+            super(null, {
+                _terms: terms,
+                _operator: operator,
+                _negative: negative
+            });
+        }
+
+        toString() {
+            if (this.terms.length === 1)
+                return `${this.negative ? '- ' : ''}${this.terms[0]}`;
+            if (this.terms.length === 2 && this.operator !== null)
+                return `${this.negative ? '- ' : ''}${this.terms[0].toString()}${this.operator}${this.terms[1].toString()}`;
         }
     }
     registerClass(TermNode);
