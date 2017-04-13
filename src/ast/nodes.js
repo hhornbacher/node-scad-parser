@@ -99,10 +99,8 @@ function Nodes(registerClass) {
 
     class CommentNode extends Node {
         constructor(text, multiline = false) {
-            if (!multiline)
-                text.replace('\n', '');
             super(null, {
-                _text: text,
+                _text: multiline ? text : text.trim(),
                 _multiline: multiline
             });
         }
@@ -127,7 +125,7 @@ function Nodes(registerClass) {
                 children: this.value,
                 params: {
                     name: this.name,
-                    type: this.value.className
+                    type: this.value.constructor.name
                 },
                 indent: _.isObject(options) && options.indent ? options.indent : 0
             })
@@ -179,31 +177,53 @@ function Nodes(registerClass) {
     registerClass(ForLoopNode);
 
     class ActionNode extends Node {
-        constructor(name, params, modifier, operators, block) {
+        constructor(name, params, block) {
             let privateProps = {
                 _name: name,
-                _modifier: modifier,
-                _params: params
+                _modifier: null,
+                _params: params,
+                _label: null
             };
             if (block) {
                 privateProps._block = block;
             }
 
-            if (_.isArray(operators)) {
-                operators = operators.trim();
-                privateProps._operators = operators;
-            }
+            /*            if (_.isArray(operators)) {
+                            operators = operators.trim();
+                            privateProps._operators = operators;
+                        }*/
 
             super(null, privateProps);
 
-            if (_.isArray(operators)) {
+/*            if (_.isArray(operators)) {
                 _.each(operators, (operator) => {
                     operator.parent = this;
                 });
-            }
+            }*/
+        }
+
+        setModifier(modifier) {
+            this.__.modifier = modifier;
+            return this;
+        }
+
+        setLabel(label) {
+            this.__.label = label;
+            return this;
         }
     }
     registerClass(ActionNode);
+
+    class FunctionNode extends Node {
+        constructor(name, params, expression) {
+            super(null, {
+                _name: name,
+                _params: params,
+                _expression: expression
+            });
+        }
+    }
+    registerClass(FunctionNode);
 
     require('./values')(registerClass);
 

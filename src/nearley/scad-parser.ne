@@ -1,39 +1,25 @@
 @{% 
     require('../ast');
-
-	const tok_module = {literal: "module"},
-		tok_function = {literal: "function"};
-
-	const tok_true = {literal: "true"},
-		tok_false = {literal: "false"};
-
-	const tok_include = {literal: "include"},
-		tok_use = {literal: "use"};
-
-	const tok_le = {literal: "<="},
-		tok_ge = {literal: ">="},
-		tok_eq = {literal: "=="};
 %}
  
 @builtin "whitespace.ne"
 
 RootNode -> 
-	Block
+	Block {% id %}
 
 Block ->
 	null
-	| Statement Block
+	| Statement Block {% d => _.concat([d[0]], d[1]) %}
 
 Statement ->
-	";"
-	| "//" [^\n]:* "\n"
-#	| %tok_include _ "<" Path ">" _ ";"
-#	| %tok_use _ "<" Path ">" _ ";"
-	| ModuleInstantiation
-	| "{" Block "}"
-	| Identifier _ "=" _ Expression _ ";" _
-	| %tok_module __ Identifier _ "(" _ Parameters _ ")" _ Statement __
-	| %tok_function __ Identifier _ "(" _ Parameters _ ")" _ "=" _ Expression __
+	"//" [^\n]:* "\n" _ {% d => new CommentNode(d[1].join('')) %}
+	| "include" _ "<" Path ">" _ ";" _ {% d => new IncludeNode(d[3]) %}
+	| "use" _ "<" Path ">" _ ";" _ {% d => new UseNode(d[3]) %}
+	| ModuleInstantiation _ {% id %}
+	| "{" _ Block _ "}"
+	| Identifier _ "=" _ Expression _ ";" _ {% d => new VariableNode(d[0], d[4]) %}
+	| "module" __ Identifier _ "(" _ Parameters _ ")" _ Statement __
+	| "function" __ Identifier _ "(" _ Parameters _ ")" _ "=" _ Expression _ ";" _ {% d => new FunctionNode(d[2], d[6], d[12]) %}
 
 
 ModuleInstantiation ->
@@ -43,26 +29,27 @@ ModuleInstantiation ->
 ModuleInstantiationList ->
 	null
 	| ModuleInstantiationList ModuleInstantiation
+	| ModuleInstantiationList Statement
 
 ChildrenInstantiation ->
 	ModuleInstantiation
-	| "{" ModuleInstantiationList "}"
+	| "{" _ ModuleInstantiationList _ "}"
 
 SingleModuleInstantiation ->
-	Identifier _ "(" _ Arguments _ ")" _
-	| Identifier ":" __ SingleModuleInstantiation
-	| "!" SingleModuleInstantiation
-	| "#" SingleModuleInstantiation
-	| "%" SingleModuleInstantiation
-	| "*" SingleModuleInstantiation
+	Identifier _ "(" _ Arguments _ ")" _  {% d => new ActionNode(d[0], d[4]) %}
+	| Identifier ":" __ SingleModuleInstantiation {% d => d[3].setLabel(d[0]) %}
+	| "!" SingleModuleInstantiation {% d => d[1].setModifier(d[0]) %}
+	| "#" SingleModuleInstantiation {% d => d[1].setModifier(d[0]) %}
+	| "%" SingleModuleInstantiation {% d => d[1].setModifier(d[0]) %}
+	| "*" SingleModuleInstantiation {% d => d[1].setModifier(d[0]) %}
 
 Expression ->
-	%tok_true {% id %}
-	| %tok_false {% id %}
-	| Identifier
+	"true" {% () => true %}
+	| "false" {% () => false %}
+	| Identifier {% id %}
 	| Expression "." Identifier
-	| String
-	| Float
+	| String {% id %}
+	| Float {% id %}
 	| "(" _ Expression _ ")"
 	| "[" _ Expression _ ":" _ Expression _ "]"
 	| "[" _ Expression _ ":" _ Expression _ ":" _ Expression _ "]"
@@ -89,36 +76,36 @@ Expression ->
 
 
 String ->
-	"\"" [^"\n]:* "\""
+	"\"" [^"\n]:* "\""  {% d => d[1].join('') %}
 
 Float ->
-	Integer
-	| Integer "." Integer {% d => d[0] + d[1] + d[2] %}
+	Integer {% d => parseFloat(d[0]) %}
+	| Integer "." Integer {% d => parseFloat(d[0] + d[1] + d[2]) %}
 
 Integer ->
 	[0-9] {% d => d[0] %}
 	| Integer [0-9] {% d => d[0] + d[1] %}
 
 VectorExpression ->
-	Expression
+	Expression {% id %}
 	| VectorExpression _ "," _ Expression
 
 Parameters ->
 	null
 	| Parameter
-	| Parameters _ "," _ Parameter
+	| Parameters _ "," _ Parameter {% d => _.concat(d[0], [d[4]]) %}
 
 Parameter ->
-	Identifier
+	Identifier {% id %}
 	| Identifier _ "=" _ Expression
 
 Arguments ->
 	null
 	| Argument
-	| Arguments _ "," _ Argument
+	| Arguments _ "," _ Argument {% d => _.concat(d[0], [d[4]]) %}
 
 Argument ->
-	Expression
+	Expression {% id %}
 	| Identifier _ "=" _ Expression
 
 Path ->
