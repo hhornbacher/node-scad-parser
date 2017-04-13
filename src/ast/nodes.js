@@ -55,7 +55,13 @@ function Nodes(registerClass) {
                     return children.toString();
             }
             else if (_.isArray(children))
-                return '\n' + indent + _.map(children, child => child.toString({ indent: indentCount + 1 }) + '\n' + indent).join('');
+                return '\n' + indent + _.map(children, child => {
+                    if (child === null)
+                        return '(null)\n' + indent;
+                    if (_.isNumber(child))
+                        return child + '\n' + indent;
+                    return child.toString({ indent: indentCount + 1 }) + '\n' + indent;
+                }).join('');
 
             return children.toString();
         }
@@ -195,11 +201,11 @@ function Nodes(registerClass) {
 
             super(null, privateProps);
 
-/*            if (_.isArray(operators)) {
-                _.each(operators, (operator) => {
-                    operator.parent = this;
-                });
-            }*/
+            /*            if (_.isArray(operators)) {
+                            _.each(operators, (operator) => {
+                                operator.parent = this;
+                            });
+                        }*/
         }
 
         setModifier(modifier) {
