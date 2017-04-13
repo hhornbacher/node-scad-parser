@@ -14,31 +14,20 @@ StatementNode ->
 	| IncludeNode EndOfStatement {% d => d[0] %}
 	| Comment _  {% d => d[0] %}
 
-VariableNode -> Name _  "=" _ TermNode {% d => new VariableNode(d[0], d[4]) %}
+VariableNode -> 
+	Name _  "=" _ TermNode {% d => new VariableNode(d[0], d[4]) %}
+	| Name _  "=" _ ValueNode {% d => new VariableNode(d[0], d[4]) %}
 
 IncludeNode ->
 	"include <" Path ">"  {% d => new IncludeNode(d[1]) %}
 	| "use <" Path ">"  {% d => new UseNode(d[1]) %}
 
 TermNode -> 
-	ValueNode {% d => d[0] %}
-	| Term
-	| Term Add Term 
-	| Term Subtract Term
-	| Term Multiply Term
-	| Term Divide Term
-	| "(" _ Term _ ")"  {% d => d[2] %}
+	"(" _ TermNode _ ")"  {% d => d[2] %}
+	| ValueNode Operator ValueNode {% d => new TermNode([d[0],d[2]], d[1]) %}
+	| TermNode Operator TermNode {% d => new TermNode([d[0],d[2]], d[1]) %}
 
-Term ->
-	ValueNode Add ValueNode
-	| ValueNode Subtract ValueNode
-	| ValueNode Multiply ValueNode
-	| ValueNode Divide ValueNode
-
-Add -> _ "+" _
-Subtract -> _ "-" _
-Multiply -> _ "*" _
-Divide -> _ "/" _
+Operator -> _ [-+*/] _   {% d => d[1] %}
 
 Path ->
 	[^>]:+ {% d => d[0].join('') %}
