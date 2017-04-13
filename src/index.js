@@ -3,72 +3,80 @@ const _ = require('lodash'),
   nearley = require("nearley"),
   grammar = require("./nearley/scad-parser"),
   inspect = require('util').inspect;
-//pegParser = require('./peg/scad-peg-parser');
 
 
 class SCADParser extends nearley.Parser {
-  constructor() {
+  constructor(useCache = true) {
     super(grammar.ParserRules, grammar.ParserStart);
-    const privateProperties = {
-      cache: [],
-      codeCache: [],
-    };
-    _.each(privateProperties, (value, key) => {
-      let readOnly = /^_.*/.test(key);
+    this.useCache = useCache;
+    if (useCache) {
+      _.each({
+        cache: [],
+        codeCache: [],
+      },
+        (value, key) => {
+          let readOnly = /^_.*/.test(key);
 
-      if (readOnly) {
-        key = key.replace('_', '');
-      }
+          if (readOnly) {
+            key = key.replace('_', '');
+          }
 
-      const privateName = '_' + key;
+          const privateName = '_' + key;
 
-      this[privateName] = value;
+          this[privateName] = value;
 
-      let options = {
-        enumerable: true,
-        get: () => {
-          return this[privateName];
-        }
-      };
+          let options = {
+            enumerable: true,
+            get: () => {
+              return this[privateName];
+            }
+          };
 
-      if (!readOnly)
-        options.set = (val) => {
-          this[privateName] = val;
-        };
+          if (!readOnly)
+            options.set = (val) => {
+              this[privateName] = val;
+            };
 
-      Object.defineProperty(this, key, options);
-    })
+          Object.defineProperty(this, key, options);
+        });
+    }
   }
 
-  loadCode(file, code, useCache) {
-    if (useCache) {
-      this.codeCache[file] = code;
+  parse(code) {
+    try {
       this.feed(code);
-      this.cache[file] = this.results;
+      return this.results;
+    } catch (error) {
+      error.location = this.offsetToLocation(code, error.offset);
+      throw error;
+    }
+  }
+
+  getCode(file, code) {
+    if (this.useCache) {
+      this.codeCache[file] = code;
+      this.cache[file] = this.parse(code);
       return this.cache[file];
     }
     else {
-      this.feed(code);
-      return this.results;
+      return this.parse(code);
     }
   };
 
-  loadFile(file, useCache) {
+  getFile(file) {
     let code = fs.readFileSync(file, 'utf8');
-    if (useCache) {
+    if (this.useCache) {
       this.codeCache[file] = code;
-      this.feed(code);
-      this.cache[file] = this.results;
+      this.cache[file] = this.parse(code);
       return this.cache[file];
     }
     else {
-      this.feed(code);
-      return this.results;
+      return this.parse(code);
     }
   };
 
-  getAST(file = null, code = null, useCache = true) {
-    if (useCache && this.cache[file])
+  getAST(file = null, code = null) {
+    if (this.useCache && this.cache[file])
       return cache[file];
 
     if (!_.isString(file) && !_.isString(code))
@@ -76,11 +84,22 @@ class SCADParser extends nearley.Parser {
 
     let result;
     if (code)
-      result = this.loadCode(file, code, useCache);
+      result = this.getCode(file, code);
     else
-      result = this.loadFile(file, useCache);
+      result = this.getFile(file);
 
     return result;
+  }
+
+  offsetToLocation(code, offset) {
+    let codeToOffset = code.substr(0, offset);
+    let lines = codeToOffset.split('\n');
+    let line = lines.length;
+    let column = lines[lines.length - 1].length + 1;
+    return {
+      line,
+      column
+    };
   }
 }
 
@@ -93,14 +112,15 @@ class SCADParser extends nearley.Parser {
  */
 const inspectObject = (obj, showHidden = true, depth = 10) => inspect(obj, showHidden, depth, true);
 
+
 // If called directly try to parse an example
 if (!module.parent) {
+  const parser = new SCADParser();
   try {
-    parser = new SCADParser();
     const ast = parser.getAST('../examples/ex4.scad');
-    console.log(ast.toString());
+    console.log(inspectObject(ast));
   } catch (error) {
-    console.log(error);
+    console.log(inspectObject(error));
   }
 }
 else
