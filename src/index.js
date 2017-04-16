@@ -84,9 +84,9 @@ class SCADParser extends nearley.Parser {
 
     let result;
     if (code)
-      result = this.getCode(file, code);
+      [result] = this.getCode(file, code);
     else
-      result = this.getFile(file);
+      [result] = this.getFile(file);
 
     return result;
   }
@@ -118,7 +118,8 @@ if (!module.parent) {
   const parser = new SCADParser();
   try {
     const ast = parser.getAST('../examples/ex4.scad');
-    console.log(inspectObject(ast));
+    console.log(inspectObject(ast.children));
+    console.log(ast.toString());
   } catch (error) {
     console.log(inspectObject(error));
   }

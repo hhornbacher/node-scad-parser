@@ -233,23 +233,24 @@ function Nodes(registerClass) {
 
     require('./values')(registerClass);
 
-    class TermNode extends Node {
-        constructor(terms, operator = null, negative = false) {
+    class ExpressionNode extends Node {
+        constructor(leftExpression, rightExpression = null, operator = null, negative = false) {
             super(null, {
-                _terms: terms,
+                _leftExpression: leftExpression,
+                _rightExpression: rightExpression,
                 _operator: operator,
                 _negative: negative
             });
         }
 
         toString() {
-            if (this.terms.length === 1)
-                return `${this.negative ? '- ' : ''}${this.terms[0]}`;
+            if (this.rightExpression===null)
+                return `${this.negative ? '- ' : ''}${this.leftExpression}`;
             if (this.terms.length === 2 && this.operator !== null)
-                return `${this.negative ? '- ' : ''}${this.terms[0].toString()}${this.operator}${this.terms[1].toString()}`;
+                return `${this.negative ? '- ' : ''}${this.leftExpression}${this.operator}${this.rightExpression}`;
         }
     }
-    registerClass(TermNode);
+    registerClass(ExpressionNode);
 
     class ParameterListNode extends Node {
         constructor(parameters, standardValuesAllowed = false) {

@@ -21,7 +21,6 @@ Statement ->
 	| "module" __ Identifier _ "(" _ Parameters _ ")" _ Statement __
 	| "function" __ Identifier _ "(" _ Parameters _ ")" _ "=" _ Expression _ ";" _ {% d => new FunctionNode(d[2], d[6], d[12]) %}
 
-
 ModuleInstantiation ->
 	SingleModuleInstantiation _ ";"
 	| SingleModuleInstantiation ChildrenInstantiation
@@ -50,30 +49,29 @@ Expression ->
 	| Expression "." Identifier
 	| String {% d => new StringValue(d[0]) %}
 	| Float {% d => new NumberValue(d[0]) %}
-	| "(" _ Expression _ ")" {% d => d[2] %}
+	| "(" _ Expression _ ")" {% d => new ExpressionNode(d[2]) %}
 	| "[" _ Expression _ ":" _ Expression _ "]" {% d => new RangeValue(d[2], d[6]) %}
 	| "[" _ Expression _ ":" _ Expression _ ":" _ Expression _ "]" {% d => new RangeValue(d[2], d[10], d[6]) %}
 	| "[" _ VectorExpression _ "]" {% d => new VectorValue(d[2]) %}
-	| Expression _ "*" _ Expression {% d => ([d[0], d[2], d[4]]) %}
-	| Expression _ "/" _ Expression {% d => ([d[0], d[2], d[4]]) %}
-	| Expression _ "%" _ Expression {% d => ([d[0], d[2], d[4]]) %}
-	| Expression _ "+" _ Expression {% d => ([d[0], d[2], d[4]]) %}
-	| Expression _ "-" _ Expression {% d => ([d[0], d[2], d[4]]) %}
-	| Expression _ "<" _ Expression {% d => ([d[0], d[2], d[4]]) %}
-	| Expression _ "<=" _ Expression {% d => ([d[0], d[2], d[4]]) %}
-	| Expression _ "==" _ Expression {% d => ([d[0], d[2], d[4]]) %}
-	| Expression _ "!=" _ Expression {% d => ([d[0], d[2], d[4]]) %}
-	| Expression _ ">=" _ Expression {% d => ([d[0], d[2], d[4]]) %}
-	| Expression _ ">" _ Expression {% d => ([d[0], d[2], d[4]]) %}
-	| Expression _ "&&" _ Expression {% d => ([d[0], d[2], d[4]]) %}
-	| Expression _ "||" _ Expression {% d => ([d[0], d[2], d[4]]) %}
+	| Expression _ "*" _ Expression {% d => new ExpressionNode(d[0], d[4], d[2]) %}
+	| Expression _ "/" _ Expression {% d => new ExpressionNode(d[0], d[4], d[2]) %}
+	| Expression _ "%" _ Expression {% d => new ExpressionNode(d[0], d[4], d[2]) %}
+	| Expression _ "+" _ Expression {% d => new ExpressionNode(d[0], d[4], d[2]) %}
+	| Expression _ "-" _ Expression {% d => new ExpressionNode(d[0], d[4], d[2]) %}
+	| Expression _ "<" _ Expression {% d => new ExpressionNode(d[0], d[4], d[2]) %}
+	| Expression _ "<=" _ Expression {% d => new ExpressionNode(d[0], d[4], d[2]) %}
+	| Expression _ "==" _ Expression {% d => new ExpressionNode(d[0], d[4], d[2]) %}
+	| Expression _ "!=" _ Expression {% d => new ExpressionNode(d[0], d[4], d[2]) %}
+	| Expression _ ">=" _ Expression {% d => new ExpressionNode(d[0], d[4], d[2]) %}
+	| Expression _ ">" _ Expression {% d => new ExpressionNode(d[0], d[4], d[2]) %}
+	| Expression _ "&&" _ Expression {% d => new ExpressionNode(d[0], d[4], d[2]) %}
+	| Expression _ "||" _ Expression {% d => new ExpressionNode(d[0], d[4], d[2]) %}
 	| "+" _ Expression {% d => d[2] %}
 	| "-" _ Expression {% d => -d[2] %}
 	| "!" _ Expression {% d => !d[2] %}
 	| Expression _ "?" _ Expression _ ":" _ Expression
 #	| Expression _ "[" _ Expression _ "]"
 	| Identifier _ "(" _ Arguments _ ")"
-
 
 String ->
 	"\"" [^"\n]:* "\""  {% d => d[1].join('') %}
