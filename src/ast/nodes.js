@@ -241,12 +241,24 @@ function Nodes(registerClass) {
                 _operator: operator,
                 _negative: negative
             });
+
+            if (leftExpression.constructor.name === 'ExpressionNode') {
+                leftExpression.parent = this;
+            }
+            if (rightExpression !== null && rightExpression.constructor.name === 'ExpressionNode') {
+                rightExpression.parent = this;
+            }
+        }
+
+        setNegative(neg) {
+            this.__.negative = neg;
+            return this;
         }
 
         toString() {
-            if (this.rightExpression===null)
+            if (this.rightExpression === null)
                 return `${this.negative ? '- ' : ''}${this.leftExpression}`;
-            if (this.terms.length === 2 && this.operator !== null)
+            if (this.rightExpression !== null && this.operator !== null)
                 return `${this.negative ? '- ' : ''}${this.leftExpression}${this.operator}${this.rightExpression}`;
         }
     }
