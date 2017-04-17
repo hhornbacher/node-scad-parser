@@ -76,7 +76,12 @@ var grammar = {
     {"name": "Expression$string$8", "symbols": [{"literal":"|"}, {"literal":"|"}], "postprocess": function joiner(d) {return d.join('');}},
     {"name": "Expression", "symbols": ["Expression", "_", "Expression$string$8", "_", "Expression"], "postprocess": d => new ExpressionNode(d[0], d[4], d[2])},
     {"name": "Expression", "symbols": [{"literal":"+"}, "_", "Expression"], "postprocess": d => d[2]},
-    {"name": "Expression", "symbols": [{"literal":"-"}, "_", "Expression"], "postprocess": d => -d[2]},
+    {"name": "Expression", "symbols": [{"literal":"-"}, "_", "Expression"], "postprocess":  d => {
+        	if(_.isNumber(d[2]))
+        		return -d[2];
+        	else
+        		return d[2].setNegative(true);
+        } },
     {"name": "Expression", "symbols": [{"literal":"!"}, "_", "Expression"], "postprocess": d => !d[2]},
     {"name": "Expression", "symbols": ["Expression", "_", {"literal":"?"}, "_", "Expression", "_", {"literal":":"}, "_", "Expression"]},
     {"name": "Expression", "symbols": ["Identifier", "_", {"literal":"("}, "_", "Arguments", "_", {"literal":")"}]},

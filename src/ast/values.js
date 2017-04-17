@@ -61,6 +61,11 @@ function Values(registerClass) {
             this.reference = reference;
         }
 
+        setNegative(neg) {
+            this.negative = neg;
+            return this;
+        }
+
         toString() {
             return `${this.negative ? '- ' : ''}${this.reference}`;
         }

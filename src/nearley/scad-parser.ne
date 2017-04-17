@@ -67,7 +67,12 @@ Expression ->
 	| Expression _ "&&" _ Expression {% d => new ExpressionNode(d[0], d[4], d[2]) %}
 	| Expression _ "||" _ Expression {% d => new ExpressionNode(d[0], d[4], d[2]) %}
 	| "+" _ Expression {% d => d[2] %}
-	| "-" _ Expression {% d => -d[2] %}
+	| "-" _ Expression {% d => {
+		if(_.isNumber(d[2]))
+			return -d[2];
+		else
+			return d[2].setNegative(true);
+	} %}
 	| "!" _ Expression {% d => !d[2] %}
 	| Expression _ "?" _ Expression _ ":" _ Expression
 #	| Expression _ "[" _ Expression _ "]"
