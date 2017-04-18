@@ -42,9 +42,14 @@ class SCADParser extends nearley.Parser {
     }
   }
 
+  preprocess(code) {
+    // Remove inline single line comments
+    return code.replace(/^(.+)\/\/.*$/mg, '$1');
+  }
+
   parse(code) {
     try {
-      this.feed(code);
+      this.feed(this.preprocess(code));
       return this.results;
     } catch (error) {
       error.location = this.offsetToLocation(code, error.offset);
@@ -110,15 +115,15 @@ class SCADParser extends nearley.Parser {
  * @param {Number} depth Defines how deep to inspect the object of interest
  * @returns {String} String with inspection result
  */
-const inspectObject = (obj, showHidden = true, depth = 10) => inspect(obj, showHidden, depth, true);
+const inspectObject = (obj, showHidden = true, depth = 5) => inspect(obj, showHidden, depth, true);
 
 
 // If called directly try to parse an example
 if (!module.parent) {
   const parser = new SCADParser();
   try {
-    const ast = parser.getAST('../examples/ex4.scad');
-    console.log(inspectObject(ast.children));
+    const ast = parser.getAST('../examples/ex1.scad');
+    //console.log(inspectObject(ast.children));
     console.log(ast.toString());
   } catch (error) {
     console.log(inspectObject(error));

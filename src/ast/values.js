@@ -28,14 +28,14 @@ function Values(registerClass) {
     }
     registerClass(StringValue);
 
-    class VectorValue extends Array {
+    class VectorValue extends SCADBaseClass {
         constructor(value) {
             super();
-            _.extend(this, new SCADBaseClass());
-            if (_.isArray(value))
-                _.each(value, v => super.push(v));
-            else
-                super.push(value);
+            this.value = value;
+        }
+
+        toString() {
+            return this.value.toString();
         }
     }
     registerClass(VectorValue);

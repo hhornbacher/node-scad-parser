@@ -16,23 +16,25 @@ Statement ->
 	| "include" _ "<" Path ">" _ ";" _ {% d => new IncludeNode(d[3]) %}
 	| "use" _ "<" Path ">" _ ";" _ {% d => new UseNode(d[3]) %}
 	| ModuleInstantiation _ {% id %}
-	| "{" _ Block _ "}"
+	| "{" _ Block _ "}" _ {% d => d[2] %}
 	| Identifier _ "=" _ Expression _ ";" _ {% d => new VariableNode(d[0], d[4]) %}
-	| "module" __ Identifier _ "(" _ Parameters _ ")" _ Statement __
+	| "module" __ Identifier _ "(" _ Parameters _ ")" _ Statement _ {% d => new ModuleNode(d[2], d[6], d[10]) %}
 	| "function" __ Identifier _ "(" _ Parameters _ ")" _ "=" _ Expression _ ";" _ {% d => new FunctionNode(d[2], d[6], d[12]) %}
 
 ModuleInstantiation ->
-	SingleModuleInstantiation _ ";"
-	| SingleModuleInstantiation ChildrenInstantiation
-
-ModuleInstantiationList ->
-	null
-	| ModuleInstantiationList ModuleInstantiation
-	| ModuleInstantiationList Statement
+	SingleModuleInstantiation _ ";" {% id %}
+	| SingleModuleInstantiation ChildrenInstantiation {% d => {
+		return d[0].setChildren(d[1]);
+	} %}
 
 ChildrenInstantiation ->
 	ModuleInstantiation
-	| "{" _ ModuleInstantiationList _ "}"
+	| "{" _ ModuleInstantiationList _ "}" {% d => d[2] %}
+
+ModuleInstantiationList ->
+	null
+	| ModuleInstantiationList ModuleInstantiation {% d => _.flattenDeep(d) %}
+	| ModuleInstantiationList Statement {% d => _.flattenDeep(d) %}
 
 SingleModuleInstantiation ->
 	Identifier _ "(" _ Arguments _ ")" _  {% d => new ActionNode(d[0], d[4]) %}
@@ -74,9 +76,9 @@ Expression ->
 			return d[2].setNegative(true);
 	} %}
 	| "!" _ Expression {% d => !d[2] %}
-	| Expression _ "?" _ Expression _ ":" _ Expression
+#	| Expression _ "?" _ Expression _ ":" _ Expression
 #	| Expression _ "[" _ Expression _ "]"
-	| Identifier _ "(" _ Arguments _ ")"
+#	| Identifier _ "(" _ Arguments _ ")"
 
 String ->
 	"\"" [^"\n]:* "\""  {% d => d[1].join('') %}
@@ -90,7 +92,7 @@ Integer ->
 	| Integer [0-9] {% d => d[0] + d[1] %}
 
 VectorExpression ->
-	Expression {% id %}
+	Expression {% d => d[0] %}
 	| VectorExpression _ "," _ Expression {% d => _.concat(d[0], [d[4]]) %}
 
 Parameters ->
