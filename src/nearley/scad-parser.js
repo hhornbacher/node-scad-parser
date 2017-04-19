@@ -32,9 +32,7 @@ var grammar = {
     {"name": "Statement$string$5", "symbols": [{"literal":"f"}, {"literal":"u"}, {"literal":"n"}, {"literal":"c"}, {"literal":"t"}, {"literal":"i"}, {"literal":"o"}, {"literal":"n"}], "postprocess": function joiner(d) {return d.join('');}},
     {"name": "Statement", "symbols": ["Statement$string$5", "__", "Identifier", "_", {"literal":"("}, "_", "Parameters", "_", {"literal":")"}, "_", {"literal":"="}, "_", "Expression", "_", {"literal":";"}, "_"], "postprocess": d => new FunctionNode(d[2], d[6], d[12])},
     {"name": "ModuleInstantiation", "symbols": ["SingleModuleInstantiation", "_", {"literal":";"}], "postprocess": id},
-    {"name": "ModuleInstantiation", "symbols": ["SingleModuleInstantiation", "ChildrenInstantiation"], "postprocess":  d => {
-        	return d[0].setChildren(d[1]);
-        } },
+    {"name": "ModuleInstantiation", "symbols": ["SingleModuleInstantiation", "ChildrenInstantiation"], "postprocess": d => d[0].setChildren(d[1])},
     {"name": "ChildrenInstantiation", "symbols": ["ModuleInstantiation"]},
     {"name": "ChildrenInstantiation", "symbols": [{"literal":"{"}, "_", "ModuleInstantiationList", "_", {"literal":"}"}], "postprocess": d => d[2]},
     {"name": "ModuleInstantiationList", "symbols": []},

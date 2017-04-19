@@ -38,10 +38,13 @@ function Nodes(registerClass) {
 
         setChildren(children) {
             children = _.filter(children, x => !!x);
+            if (children.length > 0 && this.__.children.length > 0)
+                this.__.children = [];
             _.each(children, child => {
                 this.__.children.push(child);
                 child.parent = this;
             });
+            return this;
         }
 
         pushChild(child) {
@@ -67,8 +70,9 @@ function Nodes(registerClass) {
             return _.times(count * 2, () => ' ').join('');
         }
 
-        childrenToString(children, indentCount = 0) {
-            let indent = this.indentToString(indentCount)
+        childrenToString(options) {
+            let { indent: indentCount, children } = options;
+            let indent = this.indentToString(indentCount);
             if (_.isString(children)) {
                 if (/\n/.test(children))
                     return children.replace('\n', '\n' + indent) + indent;
@@ -76,13 +80,13 @@ function Nodes(registerClass) {
                     return children.toString();
             }
             else if (_.isArray(children))
-                return '\n' + indent + _.map(children, child => {
+                return '\n' + _.map(children, child => {
                     if (child === null)
                         return '(null)\n' + indent;
                     if (_.isNumber(child))
                         return child + '\n' + indent;
-                    return child.toString({ indent: indentCount + 1 }) + '\n' + indent;
-                }).join('');
+                    return child.toString({ indent: indentCount+1 }) + '\n';
+                }).join('')  + indent;
 
             return children.toString();
         }
@@ -91,13 +95,13 @@ function Nodes(registerClass) {
             return _.map(params, (val, name) => ' ' + name + '="' + val + '"').join('');
         }
 
-        toString(options = { indent: 0 }) {
-            options = _.merge({
-                params: {},
-                children: []
-            }, options);
+        toString(options = {
+            indent: 0,
+            params: {},
+            children: []
+        }) {
             let indent = this.indentToString(options.indent);
-            return `${indent}<${this.className}${this.paramsToString(options.params)}>${this.childrenToString(options.children, options.indent)}</${this.className}>`;
+            return `${indent}<${this.className}${this.paramsToString(options.params)}>${this.childrenToString(options)}</${this.className}>`;
         }
     }
     registerClass(Node);

@@ -23,9 +23,7 @@ Statement ->
 
 ModuleInstantiation ->
 	SingleModuleInstantiation _ ";" {% id %}
-	| SingleModuleInstantiation ChildrenInstantiation {% d => {
-		return d[0].setChildren(d[1]);
-	} %}
+	| SingleModuleInstantiation ChildrenInstantiation {% d => d[0].setChildren(d[1]) %}
 
 ChildrenInstantiation ->
 	ModuleInstantiation
