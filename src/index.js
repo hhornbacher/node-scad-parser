@@ -44,7 +44,13 @@ class SCADParser extends nearley.Parser {
 
   preprocess(code) {
     // Remove inline single line comments
-    return code.replace(/^(.+)\/\/.*$/mg, '$1');
+    code = code.replace(/^(.+)\/\/.*$/mg, '$1');
+    // Remove multiline comments (while keeping line count as before)
+    const mlCommentMatcher = /\/\*([\s\S]*?)\*\//g;
+    _.each(code.match(mlCommentMatcher), (match) => {
+      code = code.replace(match, _.times(match.split('\n').length, () => '\n').join(''));
+    });
+    return code;
   }
 
   parse(code) {
@@ -122,7 +128,7 @@ const inspectObject = (obj, showHidden = true, depth = 5) => inspect(obj, showHi
 if (!module.parent) {
   const parser = new SCADParser();
   try {
-    const ast = parser.getAST('../examples/ex1.scad');
+    const ast = parser.getAST('../examples/ex'+process.argv[2]+'.scad');
     //console.log(inspectObject(ast.children));
     console.log(ast.toString());
   } catch (error) {
