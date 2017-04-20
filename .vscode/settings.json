@@ -5,7 +5,7 @@
         "commands": [
             {
                 "match": "scad-parser.ne",
-                "cmd": "nearleyc ${file} > ${fileDirname}/${fileBasenameNoExt}.js 2> ${fileDirname}/${fileBasenameNoExt}.err && nearley-railroad ${file} -o ${fileDirname}/${fileBasenameNoExt}-grammar.html"
+                "cmd": "nearleyc ${file} > ${fileDirname}/grammar.js 2> ${fileDirname}/${fileBasenameNoExt}.err && nearley-railroad ${file} -o ${fileDirname}/${fileBasenameNoExt}-grammar.html"
             }
         ]
     }

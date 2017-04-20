@@ -212,7 +212,7 @@ function Nodes(registerClass) {
     registerClass(ForLoopNode);
 
     class ActionNode extends Node {
-        constructor(name, params) {
+        constructor(name, params=[]) {
             let privateProps = {
                 _name: name,
                 _modifier: null,
@@ -235,6 +235,23 @@ function Nodes(registerClass) {
 
         setBlock(block) {
             this.children = block.children;
+            return this;
+        }
+
+/*        setParams(params) {
+            params = _.filter(params, x => !!x);
+            if (params.length > 0 && this.__.params.length > 0)
+                this.__.params = [];
+            _.each(params, param => {
+                this.__.params.push(param);
+                param.parent = this;
+            });
+            return this;
+        }*/
+
+        pushParam(param) {
+            this.__.params.push(param);
+            param.parent = this;
             return this;
         }
 

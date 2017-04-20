@@ -26,6 +26,14 @@ global.inspectObject = inspectObject;
 // Register lodash as global
 registerClass(_, '_');
 
+Array.prototype.push = (function () {
+    var original = Array.prototype.push;
+    return function () {
+        original.apply(this, arguments);
+        return this;
+    };
+})();
+
 /**
  * Base class for all AST related classes
  */
