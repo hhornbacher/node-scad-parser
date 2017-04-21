@@ -11,90 +11,87 @@ const parser = new nearley.Parser(grammar.ParserRules, grammar.ParserStart);
 const lexer = moo.states({ start: stateStart, comment: stateComment });
 
 class SCADParser {
-  constructor(useCache = true) {
+  constructor() {
     this.ignoredTokens = ['whitespace', 'eol'];
     this.results = null;
-    this.useCache = useCache;
-    if (useCache) {
-      _.each({
-        cache: [],
-        codeCache: [],
-      },
-        (value, key) => {
-          let readOnly = /^_.*/.test(key);
+    _.each({
+      cache: [],
+      codeCache: [],
+    },
+      (value, key) => {
+        let readOnly = /^_.*/.test(key);
 
-          if (readOnly) {
-            key = key.replace('_', '');
+        if (readOnly) {
+          key = key.replace('_', '');
+        }
+
+        const privateName = '_' + key;
+
+        this[privateName] = value;
+
+        let options = {
+          enumerable: true,
+          get: () => {
+            return this[privateName];
           }
+        };
 
-          const privateName = '_' + key;
-
-          this[privateName] = value;
-
-          let options = {
-            enumerable: true,
-            get: () => {
-              return this[privateName];
-            }
+        if (!readOnly)
+          options.set = (val) => {
+            this[privateName] = val;
           };
 
-          if (!readOnly)
-            options.set = (val) => {
-              this[privateName] = val;
-            };
-
-          Object.defineProperty(this, key, options);
-        });
-    }
+        Object.defineProperty(this, key, options);
+      });
   }
 
-  parse(code) {
+  parse(code, file) {
     let tokens = [];
     try {
       let token;
 
-      // feed to moo
+      // Feed whole code to lexer
       lexer.reset(code);
+
+      // Iterate through code
       while (token = lexer.next()) {
-        // ignore tokens if asked!
+        // Ignore token, if defined
         if (this.ignoredTokens.includes(token.type))
           continue;
 
+        // Capture token
         tokens.push(token);
+
+        // Feed the token to the parser
         parser.feed([token]);
       }
       return parser.results;
     } catch (error) {
-      error.lastTokens = tokens.slice(tokens.length-3, tokens.length);
+      // Get last lexed token
+      const last = tokens[tokens.length - 1];
+
+      // Check if last token is a LexerError
+      if (last.type === 'LexerError') {
+        error = new Error(`Lexer error:\n${last.value}`);
+        // Add the location to the error
+        //error.location = _.pick(last, ['offset', 'size', 'lineBreaks', 'line', 'col']);
+        error.location = new Location(last);
+      }
+      else {
+        error = new Error(`Parser error: Unexpected ${last.type} '${last.value}'`);
+        // Add the last 3 tokens to the error
+        error.lastTokens = tokens.slice(tokens.length - 3, tokens.length);
+        // Add the location to the error
+        error.location = new Location(last);
+        // Add the code excerpt to the error
+        error.excerpt = this.getCodeExcerpt(file, error.location);
+      }
       throw error;
     }
   }
 
-  getCode(file, code) {
-    if (this.useCache) {
-      this.codeCache[file] = code;
-      this.cache[file] = this.parse(code);
-      return this.cache[file];
-    }
-    else {
-      return this.parse(code);
-    }
-  };
-
-  getFile(file) {
-    let code = fs.readFileSync(file, 'utf8');
-    if (this.useCache) {
-      this.codeCache[file] = code;
-      this.cache[file] = this.parse(code);
-      return this.cache[file];
-    }
-    else {
-      return this.parse(code);
-    }
-  };
-
-  parseAST(file = null, code = null) {
-    if (this.useCache && this.cache[file])
+  parseAST(file, code = null) {
+    if (this.cache[file])
       return cache[file];
 
     if (!_.isString(file) && !_.isString(code))
@@ -103,22 +100,24 @@ class SCADParser {
     let result;
     if (code)
       [result] = this.getCode(file, code);
-    else
-      [result] = this.getFile(file);
+    else {
+      let code = fs.readFileSync(file, 'utf8');
+      this.codeCache[file] = code;
+      this.cache[file] = this.parse(code, file);
+    }
 
-    return result;
+    return this.cache[file];
   }
 
-  /*  offsetToLocation(code, offset) {
-      let codeToOffset = code.substr(0, offset);
-      let lines = codeToOffset.split('\n');
-      let line = lines.length;
-      let column = lines[lines.length - 1].length + 1;
-      return {
-        line,
-        column
-      };
-    }*/
+  getCodeExcerpt(file, location, lines = 3) {
+    if (!this.codeCache[file]) {
+      let code = fs.readFileSync(file, 'utf8');
+      this.codeCache[file] = code;
+    }
+    let code = this.codeCache[file].split('\n');
+    code = code.slice(location.line-(lines+2), location.line+(lines-1));
+    return code.join('\n');
+  }
 }
 
 module.export = SCADParser;
