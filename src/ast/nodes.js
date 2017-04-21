@@ -5,8 +5,7 @@ function Nodes(registerClass) {
     class Node extends SCADBaseClass {
         constructor(children, privateProps = {}, token) {
             privateProps = _.merge({
-                parent: null,
-                _location: token ? new Location(token) : null
+                parent: null
             }, privateProps);
 
             if (_.isArray(children)) {
@@ -17,6 +16,8 @@ function Nodes(registerClass) {
                 privateProps._children = [];
 
             super(privateProps);
+
+            this.location = token ? new Location(token) : null;
 
             if (_.isArray(children)) {
                 _.each(children, (child) => {
@@ -80,14 +81,17 @@ function Nodes(registerClass) {
                 else
                     return children.toString();
             }
-            else if (_.isArray(children))
-                return '\n' + _.map(children, child => {
-                    if (child === null)
-                        return '(null)\n' + indent;
-                    if (_.isNumber(child))
-                        return child + '\n' + indent;
-                    return child.toString({ indent: indentCount + 1 }) + '\n';
-                }).join('') + indent;
+            else if (_.isArray(children)) {
+                if (children.length > 0)
+                    return '\n' + _.map(children, child => {
+                        if (child === null)
+                            return '(null)\n' + indent;
+                        if (_.isNumber(child))
+                            return child + '\n' + indent;
+                        return child.toString({ indent: indentCount + 1 }) + '\n';
+                    }).join('') + indent;
+                return '';
+            }
 
             if (children)
                 return children.toString();
@@ -104,7 +108,7 @@ function Nodes(registerClass) {
             children: []
         }) {
             let indent = this.indentToString(options.indent);
-            return `${indent}<${this.className}${this.paramsToString(options.params)}>${this.childrenToString(options)}</${this.className}>`;
+            return `${indent}<${this.className.replace('Node', '')}${this.paramsToString(options.params)}>${this.childrenToString(options)}</${this.className.replace('Node', '')}>`;
         }
     }
     registerClass(Node);
