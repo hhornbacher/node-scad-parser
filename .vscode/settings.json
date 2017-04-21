@@ -4,8 +4,8 @@
         "autoClearConsole": true,
         "commands": [
             {
-                "match": "scad-parser.ne",
-                "cmd": "nearleyc ${file} > ${fileDirname}/grammar.js 2> ${fileDirname}/${fileBasenameNoExt}.err && nearley-railroad ${file} -o ${fileDirname}/${fileBasenameNoExt}-grammar.html"
+                "match": "grammar.ne",
+                "cmd": "nearleyc ${file} > ${fileDirname}/${fileBasenameNoExt}.js 2> ${fileDirname}/${fileBasenameNoExt}.err && rm ${fileDirname}/${fileBasenameNoExt}.err && nearley-railroad ${file} -o ${fileDirname}/${fileBasenameNoExt}.html"
             }
         ]
     }
