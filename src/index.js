@@ -11,7 +11,7 @@ class SCADParser {
   constructor(useCache = true) {
     const nm = require('./nearley/nearley-moo').parser(nearley, grammar);
     this.parser = nm(moo.states({start: stateStart, comment: stateComment}));
-    this.parser.ignore('whitespace');
+    this.parser.ignore(['whitespace', 'eol']);
     this.useCache = useCache;
     if (useCache) {
       _.each({
@@ -133,14 +133,15 @@ if (!module.parent) {
 
   const parser = new SCADParser();
   try {
-    let index = process.argv[2] || 6;
+    let index = process.argv[2] || 3;
     const ast = parser.getAST('../examples/ex' + index + '.scad');
-    //console.log(inspectObject(ast.children));
-    console.log(inspectObject(_.filter(ast, (c) => {
+    console.log(ast);
+    console.log(ast.toString());
+/*    console.log(inspectObject(_.filter(ast, (c) => {
       if(c === null)
         return false;
       return true;
-    })));
+    })));*/
     console.log('done');
   } catch (error) {
     console.log(error);

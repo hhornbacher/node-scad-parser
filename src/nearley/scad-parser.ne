@@ -24,8 +24,8 @@ Block ->
 Statement -> 
 	%comment {% d => new CommentNode(d[0].value) %}
 	| %lcomment %icomment %rcomment {% d => new CommentNode(d[1].value, true) %}
-	| %keyword_include %lpath %path %rpath %eos {% d => new IncludeNode(d[2].value) %}
-	| %keyword_use %lpath %path %rpath %eos {% d => new UseNode(d[2].value) %}
+	| %include %eos {% d => new IncludeNode(d[0].value) %}
+	| %use %eos {% d => new UseNode(d[0].value) %}
 	| %keyword_module %identifier %lparent Parameters:? %rparent {% d => new ModuleNode(d[1].value, d[3]/*, d[10]*/) %}
 	| %keyword_function %identifier %lparent Parameters:? %rparent %assign Expression %eos {% d => new FunctionNode(d[2]/*, d[6], d[12]*/) %}
 	| %lblock Block %rblock {% d => d[1] %}

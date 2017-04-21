@@ -1,20 +1,18 @@
 const moo = require('moo');
 
 module.exports = {
+    include: {match: /include\s*<(.+)>/, lineBreaks: true},
+    use: {match: /use\s*<(.+)>/, lineBreaks: true},
     comment: { match: /\/\/(.*)\n/, lineBreaks: true },
     lcomment: {match: /\/\*\s*/, push: 'comment', lineBreaks: true},
-    eol: { match: /\n/, lineBreaks: true },
-    eos: /[ \t]*;/,
-    whitespace: /[ \t]+/,
     keyword: [
-        'include',
-        'use',
         'function',
         'module',
         'true',
         'false'
     ],
     comma: ',',
+    identifier: /[A-Za-z_$][A-Za-z0-9_]*|[!#\*\%][A-Za-z][A-Za-z0-9_]*/,
     operator1: /\*|\/|\%/,
     operator2: /\+|\-/,
     operator3: /<|<=|==|!=|>=|>|&&|\|\|/,
@@ -22,15 +20,14 @@ module.exports = {
     seperator: ':',
     lvect: '[',
     rvect: ']',
-    lpath: '<',
-    rpath: '>',
     lparent: '(',
     rparent: ')',
     lblock: '{',
     rblock: '}',
     string: /"[^"]*"/,
     float: /([0-9]+(?:\.?[0-9]*(?:[eE][-+]?[0-9]+)?)?)/,
-    path: /[\w\.\/]+\.scad/,
-    identifier: /[A-Za-z_$!#\*%][A-Za-z0-9_]*/,
+    eol: { match: /\n/, lineBreaks: true },
+    eos: /[ \t]*;/,
+    whitespace: /[ \t]+/,
     myError: moo.error
 }
