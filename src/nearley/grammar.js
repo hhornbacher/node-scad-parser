@@ -4,11 +4,7 @@
 function id(x) {return x[0]; }
  
 	
-const nm = require('./nearley-moo');
-nm(require('./state-start.js'));
-nm(require('./state-comment.js'));
-
-
+require('./tokens');
 require('../ast');
 
 var grammar = {

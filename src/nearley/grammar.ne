@@ -1,10 +1,6 @@
 @{% 
 	
-const nm = require('./nearley-moo');
-nm(require('./state-start.js'));
-nm(require('./state-comment.js'));
-
-
+require('./tokens');
 require('../ast');
 
 %}

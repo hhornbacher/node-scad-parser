@@ -7,11 +7,13 @@ const _ = require('lodash'),
   stateComment = require("./nearley/state-comment"),
   inspect = require('util').inspect;
 
+const parser = new nearley.Parser(grammar.ParserRules, grammar.ParserStart);
+const lexer = moo.states({ start: stateStart, comment: stateComment });
+
 class SCADParser {
   constructor(useCache = true) {
-    const nm = require('./nearley/nearley-moo').parser(nearley, grammar);
-    this.parser = nm(moo.states({start: stateStart, comment: stateComment}));
-    this.parser.ignore(['whitespace', 'eol']);
+    this.ignoredTokens = ['whitespace', 'eol'];
+    this.results = null;
     this.useCache = useCache;
     if (useCache) {
       _.each({
@@ -46,21 +48,20 @@ class SCADParser {
     }
   }
 
-  /*  preprocess(code) {
-      // Remove inline single line comments
-      code = code.replace(/^(.+)\/\/.*$/mg, '$1');
-      // Remove multiline comments (while keeping line count as before)
-      const mlCommentMatcher = /\/\*([\s\S]*?)\*\//g;
-      _.each(code.match(mlCommentMatcher), (match) => {
-        code = code.replace(match, _.times(match.split('\n').length, () => '\n').join(''));
-      });
-      return code;
-    }*/
-
   parse(code) {
     try {
-      this.parser.feed(code);
-      return this.parser.results;
+      let token;
+
+      // feed to moo
+      lexer.reset(code);
+      while (token = lexer.next()) {
+        // ignore tokens if asked!
+        if (this.ignoredTokens.includes(token.type))
+          continue;
+
+        parser.feed([token]);
+      }
+      return parser.results;
     } catch (error) {
       error.location = this.offsetToLocation(code, error.offset);
       throw error;
@@ -137,11 +138,11 @@ if (!module.parent) {
     const ast = parser.getAST('../examples/ex' + index + '.scad');
     console.log(ast);
     console.log(ast.toString());
-/*    console.log(inspectObject(_.filter(ast, (c) => {
-      if(c === null)
-        return false;
-      return true;
-    })));*/
+    /*    console.log(inspectObject(_.filter(ast, (c) => {
+          if(c === null)
+            return false;
+          return true;
+        })));*/
     console.log('done');
   } catch (error) {
     console.log(error);
