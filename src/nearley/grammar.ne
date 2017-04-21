@@ -18,14 +18,14 @@ Block ->
 
 
 Statement -> 
-	%comment {% d => new CommentNode(d[0].value) %}
-	| %lcomment %icomment %rcomment {% d => new CommentNode(d[1].value, true) %}
-	| %include %eos {% d => new IncludeNode(d[0].value) %}
-	| %use %eos {% d => new UseNode(d[0].value) %}
-	| %keyword_module %identifier %lparent Parameters:? %rparent {% d => new ModuleNode(d[1].value, d[3]/*, d[10]*/) %}
-	| %keyword_function %identifier %lparent Parameters:? %rparent %assign Expression %eos {% d => new FunctionNode(d[2]/*, d[6], d[12]*/) %}
+	%comment {% d => new CommentNode(d[0], d[0].value) %}
+	| %lcomment %icomment %rcomment {% d => new CommentNode(d[1], d[1].value, true) %}
+	| %include %eos {% d => new IncludeNode(d[0], d[0].value) %}
+	| %use %eos {% d => new UseNode(d[0], d[0].value) %}
+	| %keyword_module %identifier %lparent Parameters:? %rparent {% d => new ModuleNode(d[1], d[1].value, d[3]/*, d[10]*/) %}
+	| %keyword_function %identifier %lparent Parameters:? %rparent %assign Expression %eos {% d => new FunctionNode(d[2], d[2].value/*, d[6], d[12]*/) %}
 	| %lblock Block %rblock {% d => d[1] %}
-	| %identifier %assign Expression %eos {% d => new VariableNode(d[0].value, d[2]) %}
+	| %identifier %assign Expression %eos {% d => new VariableNode(d[0], d[0].value, d[2]) %}
 	| ModuleInstantiation {% id %}
 
 
@@ -38,9 +38,9 @@ ChildrenInstantiation ->
 	| ModuleInstantiation
 
 SingleModuleInstantiation ->
-	%identifier %lparent %rparent  {% d => new ActionNode(d[0]) %}
-	| %identifier %lparent Arguments %rparent  {% d => new ActionNode(d[0], d[4]) %}
-	| %identifier %seperator SingleModuleInstantiation {% d => d[3].setLabel(d[0]) %}
+	%identifier %lparent %rparent  {% d => new ActionNode(d[0], d[0].value) %}
+	| %identifier %lparent Arguments %rparent  {% d => new ActionNode(d[0], d[0].value, d[4]) %}
+	| %identifier %seperator SingleModuleInstantiation {% d => d[3].setLabel(d[0].value) %}
 
 
 Expression -> 

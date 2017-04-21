@@ -49,6 +49,7 @@ class SCADParser {
   }
 
   parse(code) {
+    let tokens = [];
     try {
       let token;
 
@@ -59,11 +60,12 @@ class SCADParser {
         if (this.ignoredTokens.includes(token.type))
           continue;
 
+        tokens.push(token);
         parser.feed([token]);
       }
       return parser.results;
     } catch (error) {
-      error.location = this.offsetToLocation(code, error.offset);
+      error.lastTokens = tokens.slice(tokens.length-3, tokens.length);
       throw error;
     }
   }
@@ -91,7 +93,7 @@ class SCADParser {
     }
   };
 
-  getAST(file = null, code = null) {
+  parseAST(file = null, code = null) {
     if (this.useCache && this.cache[file])
       return cache[file];
 
@@ -107,16 +109,16 @@ class SCADParser {
     return result;
   }
 
-  offsetToLocation(code, offset) {
-    let codeToOffset = code.substr(0, offset);
-    let lines = codeToOffset.split('\n');
-    let line = lines.length;
-    let column = lines[lines.length - 1].length + 1;
-    return {
-      line,
-      column
-    };
-  }
+  /*  offsetToLocation(code, offset) {
+      let codeToOffset = code.substr(0, offset);
+      let lines = codeToOffset.split('\n');
+      let line = lines.length;
+      let column = lines[lines.length - 1].length + 1;
+      return {
+        line,
+        column
+      };
+    }*/
 }
 
 module.export = SCADParser;
@@ -135,8 +137,7 @@ if (!module.parent) {
   const parser = new SCADParser();
   try {
     let index = process.argv[2] || 3;
-    const ast = parser.getAST('../examples/ex' + index + '.scad');
-    console.log(ast);
+    const ast = parser.parseAST('../examples/ex' + index + '.scad');
     console.log(ast.toString());
     /*    console.log(inspectObject(_.filter(ast, (c) => {
           if(c === null)
