@@ -29,7 +29,7 @@ module.exports = {
     lblock: '{',
     rblock: '}',
     string: /"[^"]*"/,
-    float: /[0-9]+\.?[0-9]*([eE][-+]?[0-9]+)?/,
+    float: /([0-9]+(?:\.?[0-9]*(?:[eE][-+]?[0-9]+)?)?)/,
     path: /[\w\.\/]+\.scad/,
     identifier: /[A-Za-z_$][A-Za-z0-9_]*/,
     myError: moo.error
