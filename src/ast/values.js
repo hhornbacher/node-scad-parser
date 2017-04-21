@@ -3,34 +3,38 @@ const _ = require('lodash');
 function Values(registerClass) {
 
     class NumberValue extends Number {
-        constructor(value) {
+        constructor(token, value) {
             if (_.isString(value))
                 value = parseFloat(value);
             super(value);
             _.extend(this, new SCADBaseClass());
+            this.location = token ? new Location(token) : null;
         }
     }
     registerClass(NumberValue);
 
     class BooleanValue extends Boolean {
-        constructor(value) {
+        constructor(token, value) {
             super(value);
             _.extend(this, new SCADBaseClass());
+            this.location = token ? new Location(token) : null;
         }
     }
     registerClass(BooleanValue);
 
     class StringValue extends String {
-        constructor(value) {
+        constructor(token, value) {
             super(value);
             _.extend(this, new SCADBaseClass());
+            this.location = token ? new Location(token) : null;
         }
     }
     registerClass(StringValue);
 
     class VectorValue extends SCADBaseClass {
-        constructor(value) {
+        constructor(token, value) {
             super();
+            this.location = token ? new Location(token) : null;
             this.value = value;
         }
 
@@ -41,8 +45,9 @@ function Values(registerClass) {
     registerClass(VectorValue);
 
     class RangeValue extends SCADBaseClass {
-        constructor(start, end, increment = new NumberValue(1)) {
+        constructor(token, start, end, increment = new NumberValue(1)) {
             super();
+            this.location = token ? new Location(token) : null;
             this.start = start;
             this.end = end;
             this.increment = increment;
@@ -55,8 +60,9 @@ function Values(registerClass) {
     registerClass(RangeValue);
 
     class ReferenceValue extends SCADBaseClass {
-        constructor(reference, negative = false) {
+        constructor(token, reference, negative = false) {
             super();
+            this.location = token ? new Location(token) : null;
             this.negative = negative;
             this.reference = reference;
         }

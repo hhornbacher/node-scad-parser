@@ -29,5 +29,5 @@ module.exports = {
     eol: { match: /\n/, lineBreaks: true },
     eos: /[ \t]*;/,
     whitespace: /[ \t]+/,
-    myError: moo.error
+    LexerError: moo.error
 }

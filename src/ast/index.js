@@ -75,43 +75,27 @@ class SCADBaseClass {
 }
 registerClass(SCADBaseClass);
 
-/*class Location extends SCADBaseClass {
-    constructor({ start, end } = location()) {
-        super({
-            _start: start,
-            _end: end
-        });
-    }
-}
-registerClass(Location);*/
-
-class Trace extends SCADBaseClass {
-    constructor({ type, rule, location }) {
-        super({
-            _type: type.replace('rule.', ''),
-            _rule: rule/*,
-            _location: new Location(location)*/
-        });
-    }
-}
-registerClass(Trace);
-
-class SCADTracer extends SCADBaseClass {
-    constructor() {
-        super({
-            stackTrace: []
-        });
+class Location {
+    constructor({ offset, size, lineBreaks, line, col }) {
+        this.offset = offset;
+        this.size = size;
+        this.lineBreaks = lineBreaks;
+        this.line = line;
+        this.column = col;
     }
 
-    trace(current) {
-        this.stackTrace.push(new Trace(current));
+    toString() {
+        return inspectObject(this);
     }
 }
-registerClass(SCADTracer);
+registerClass(Location);
 
 // Register error classes as global
 require('./errors')(registerClass);
 
-// Register node classes as global, if file is set
+// Register value classes as global
+require('./values')(registerClass);
+
+// Register node classes as global
 require('./nodes')(registerClass);
 

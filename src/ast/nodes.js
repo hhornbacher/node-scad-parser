@@ -3,7 +3,7 @@ const _ = require('lodash');
 function Nodes(registerClass) {
 
     class Node extends SCADBaseClass {
-        constructor(children, privateProps = {}) {
+        constructor(children, privateProps = {}, token) {
             privateProps = _.merge({
                 parent: null
             }, privateProps);
@@ -16,6 +16,8 @@ function Nodes(registerClass) {
                 privateProps._children = [];
 
             super(privateProps);
+
+            this.location = token ? new Location(token) : null;
 
             if (_.isArray(children)) {
                 _.each(children, (child) => {
@@ -79,14 +81,17 @@ function Nodes(registerClass) {
                 else
                     return children.toString();
             }
-            else if (_.isArray(children))
-                return '\n' + _.map(children, child => {
-                    if (child === null)
-                        return '(null)\n' + indent;
-                    if (_.isNumber(child))
-                        return child + '\n' + indent;
-                    return child.toString({ indent: indentCount + 1 }) + '\n';
-                }).join('') + indent;
+            else if (_.isArray(children)) {
+                if (children.length > 0)
+                    return '\n' + _.map(children, child => {
+                        if (child === null)
+                            return '(null)\n' + indent;
+                        if (_.isNumber(child))
+                            return child + '\n' + indent;
+                        return child.toString({ indent: indentCount + 1 }) + '\n';
+                    }).join('') + indent;
+                return '';
+            }
 
             if (children)
                 return children.toString();
@@ -103,7 +108,7 @@ function Nodes(registerClass) {
             children: []
         }) {
             let indent = this.indentToString(options.indent);
-            return `${indent}<${this.className}${this.paramsToString(options.params)}>${this.childrenToString(options)}</${this.className}>`;
+            return `${indent}<${this.className.replace('Node', '')}${this.paramsToString(options.params)}>${this.childrenToString(options)}</${this.className.replace('Node', '')}>`;
         }
     }
     registerClass(Node);
@@ -112,7 +117,7 @@ function Nodes(registerClass) {
         constructor(children) {
             super(children, {
                 _root: true
-            });
+            }, null);
         }
 
         toString(options = { indent: 0 }) {
@@ -122,11 +127,11 @@ function Nodes(registerClass) {
     registerClass(RootNode);
 
     class CommentNode extends Node {
-        constructor(text, multiline = false) {
+        constructor(token, text, multiline = false) {
             super(null, {
                 _text: multiline ? text : text.trim(),
                 _multiline: multiline
-            });
+            }, token);
         }
 
         toString(options = { indent: 0 }) {
@@ -140,11 +145,11 @@ function Nodes(registerClass) {
     registerClass(CommentNode);
 
     class VariableNode extends Node {
-        constructor(name, value) {
+        constructor(token, name, value) {
             super(null, {
                 _name: name,
                 _value: value
-            });
+            }, token);
         }
 
         toString(options = { indent: 0 }) {
@@ -161,10 +166,10 @@ function Nodes(registerClass) {
     registerClass(VariableNode);
 
     class IncludeNode extends Node {
-        constructor(file) {
+        constructor(token, file) {
             super(null, {
                 _file: file
-            });
+            }, token);
         }
 
         toString(options = { indent: 0 }) {
@@ -181,11 +186,11 @@ function Nodes(registerClass) {
     registerClass(UseNode);
 
     class ModuleNode extends Node {
-        constructor(name, params, block) {
+        constructor(token, name, params, block) {
             super(block, {
                 _name: name,
                 _params: params
-            });
+            }, token);
         }
 
         toString(options = { indent: 0 }) {
@@ -205,7 +210,7 @@ function Nodes(registerClass) {
     registerClass(ModuleNode);
 
     class ForLoopNode extends Node {
-        constructor(params, block) {
+        constructor(token, params, block) {
             super(block, {
                 _params: params
             });
@@ -214,7 +219,7 @@ function Nodes(registerClass) {
     registerClass(ForLoopNode);
 
     class ActionNode extends Node {
-        constructor(name, params = []) {
+        constructor(token, name, params = []) {
             let privateProps = {
                 _name: name,
                 _modifier: null,
@@ -222,7 +227,7 @@ function Nodes(registerClass) {
                 _label: null
             };
 
-            super([], privateProps);
+            super([], privateProps, token);
         }
 
         setModifier(modifier) {
@@ -277,12 +282,12 @@ function Nodes(registerClass) {
     registerClass(ActionNode);
 
     class FunctionNode extends Node {
-        constructor(name, params, expression) {
+        constructor(token, name, params, expression) {
             super(null, {
                 _name: name,
                 _params: params,
                 _expression: expression
-            });
+            }, token);
         }
 
         toString(options = { indent: 0 }) {
@@ -300,8 +305,6 @@ function Nodes(registerClass) {
     }
     registerClass(FunctionNode);
 
-    require('./values')(registerClass);
-
     class ExpressionNode extends Node {
         constructor(leftExpression, rightExpression = null, operator = null, negative = false) {
             super(null, {
@@ -309,7 +312,7 @@ function Nodes(registerClass) {
                 _rightExpression: rightExpression,
                 _operator: operator,
                 _negative: negative
-            });
+            }, null);
 
             if (leftExpression.constructor.name === 'ExpressionNode') {
                 leftExpression.parent = this;
@@ -332,25 +335,6 @@ function Nodes(registerClass) {
         }
     }
     registerClass(ExpressionNode);
-
-    class ParameterListNode extends Node {
-        constructor(parameters, standardValuesAllowed = false) {
-            super(null, {
-                _parameters: parameters,
-                _standardValuesAllowed: standardValuesAllowed
-            });
-        }
-    }
-    registerClass(ParameterListNode);
-
-    class ForLoopParameterListNode extends Node {
-        constructor(parameters) {
-            super(null, {
-                _parameters: parameters
-            });
-        }
-    }
-    registerClass(ForLoopParameterListNode);
 };
 
 module.exports = Nodes;
