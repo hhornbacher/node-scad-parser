@@ -75,15 +75,13 @@ class SCADBaseClass {
 }
 registerClass(SCADBaseClass);
 
-class Location extends SCADBaseClass {
+class Location {
     constructor({ offset, size, lineBreaks, line, col }) {
-        super({
-            _offset: offset,
-            _size: size,
-            _lineBreaks: lineBreaks,
-            _line: line,
-            _column: col
-        });
+        this.offset = offset;
+        this.size = size;
+        this.lineBreaks = lineBreaks;
+        this.line = line;
+        this.column = col;
     }
 
     toString() {
