@@ -56,15 +56,43 @@ module drawDisplayModule() {
         #cube(size=[pinHeaderHeight, pinHeaderWidh, pinHeaderTopDepth]);
     }
 }
-       /*
+
+module display() {
+    // Display module model
+    *drillHoles(positions=[
+            [4,4,0],
+            [4,pcbHeight-4,0],
+            [pcbWidth-4,4,0],
+            [pcbWidth-4,pcbHeight-4,0]
+        ], depth=pcbDepth, diameter=holeDiameter, $fn=50) {
+        drawDisplayModule();
+    }
+
+    translate([vfdXOffset-8, vfdYOffset-8, pcbDepth+vfdDepth+tollerance]) {
+        topFrame();
+    }
+}
+
+
+snapperHole(position=[0,25,0],dimension=[4,12,1], noseDepth=4, noseHeight=6) {
+*snapper(position=[0,10,0],dimension=[8-(4*$t),12+(4*$t),1], noseDepth=6-(3*$t), noseHeight=6-(2*$t)) {
+    // Wall to mount to
+    translate([-19, 0, 0]) {
+    cube(size=[20, 40, 20]);
+    }
+}
+}
+display();
+
+
 module topFrame(shrink=4, size=2, depth=4, t=tollerance) {
     // Frame top
     color("black") {
         CubePoints = [
         [  -(size/2),  -(size/2),  0 ],  //0
-        [ vfdWidth+(shrink*4)+(size/2),  -(size/2),  0 ],  //1
-        [ vfdWidth+(shrink*4)+(size/2),  vfdHeight+(shrink*4)+(size/2),  0 ],  //2
-        [  -(size/2),  vfdHeight+(shrink*4)+(size/2),  0 ],  //3
+        [ vfdWidth+(shrink * 4)+(size/2),  -(size/2),  0 ],  //1
+        [ vfdWidth+(shrink * 4)+(size/2),  vfdHeight+(shrink * 4)+(size/2),  0 ],  //2
+        [  -(size/2),  vfdHeight+(shrink * 4)+(size/2),  0 ],  //3
         [  shrink-(size/2),  shrink-(size/2),  topFrameDepth ],  //4
         [ vfdWidth+(shrink*3)+(size/2),  shrink-(size/2),  topFrameDepth ],  //5
         [ vfdWidth+(shrink*3)+(size/2),  vfdHeight+(shrink*3)+(size/2),  topFrameDepth ],  //6
@@ -76,6 +104,7 @@ module topFrame(shrink=4, size=2, depth=4, t=tollerance) {
         [5,6,2,1],  // right
         [6,7,3,2],  // back
         [7,4,0,3]]; // left
+
         
         difference() {
             polyhedron( CubePoints, CubeFaces );
@@ -104,14 +133,13 @@ module topFrame(shrink=4, size=2, depth=4, t=tollerance) {
             x=5;
         }
         
-        #snapper()
+        #snapper(
              position=[vfdWidth+(size*2)+5,((vfdHeight+(size*2))/2)+(snapperWidth*2),-snapperHeight],
              rotation=[0, 0, 180],
              dimension=[snapperWidth,snapperHeight,snapperBridgeDepth], 
              noseDepth=snapperNoseDepth, 
              noseHeight=6
              ) {
-        
                 // Frame bottom
                 difference() {
                     translate([(shrink*2)-size, (shrink*2)-size, -depth]) {
@@ -125,30 +153,4 @@ module topFrame(shrink=4, size=2, depth=4, t=tollerance) {
     }
 }
 
-module display() {
-    // Display module model
-    *drillHoles(positions=[
-            [4,4,0],
-            [4,pcbHeight-4,0],
-            [pcbWidth-4,4,0],
-            [pcbWidth-4,pcbHeight-4,0]
-        ], depth=pcbDepth, diameter=holeDiameter, $fn=50) {
-        drawDisplayModule();
-    }
-
-    translate([vfdXOffset-8, vfdYOffset-8, pcbDepth+vfdDepth+tollerance]) {
-        topFrame();
-    }
-}
-
-snapperHole(position=[0,25,0],dimension=[4,12,1], noseDepth=4, noseHeight=6) {
-*snapper(position=[0,10,0],dimension=[8-(4*$t),12+(4*$t),1], noseDepth=6-(3*$t), noseHeight=6-(2*$t)) {
-    // Wall to mount to
-    translate([-19, 0, 0]) {
-    cube(size=[20, 40, 20]);
-    }
-}
-}
-display();
-
-*/
+        

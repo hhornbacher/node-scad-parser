@@ -9,8 +9,11 @@ function Nodes(registerClass) {
             }, privateProps);
 
             if (_.isArray(children)) {
+                children = _.filter(children, x => !!x);
                 privateProps._children = children;
             }
+            else
+                privateProps._children = [];
 
             super(privateProps);
 
@@ -33,6 +36,27 @@ function Nodes(registerClass) {
             throw Error('Wrong parameter type!');
         }
 
+        setChildren(children) {
+            children = _.filter(children, x => !!x);
+            if (children.length > 0 && this.__.children.length > 0)
+                this.__.children = [];
+            _.each(children, child => {
+                this.__.children.push(child);
+                child.parent = this;
+            });
+            return this;
+        }
+
+        pushChild(child) {
+            if (!_.isArray(this.__.children))
+                this.__.children = [];
+
+            this.__.children.push(child);
+            child.parent = this;
+
+            return this;
+        }
+
         getChildrenOfType(type) {
             if (!this.children)
                 return null;
@@ -46,8 +70,9 @@ function Nodes(registerClass) {
             return _.times(count * 2, () => ' ').join('');
         }
 
-        childrenToString(children, indentCount = 0) {
-            let indent = this.indentToString(indentCount)
+        childrenToString(options) {
+            let { indent: indentCount, children } = options;
+            let indent = this.indentToString(indentCount);
             if (_.isString(children)) {
                 if (/\n/.test(children))
                     return children.replace('\n', '\n' + indent) + indent;
@@ -55,49 +80,42 @@ function Nodes(registerClass) {
                     return children.toString();
             }
             else if (_.isArray(children))
-                return '\n' + indent + _.map(children, child => {
+                return '\n' + _.map(children, child => {
                     if (child === null)
                         return '(null)\n' + indent;
                     if (_.isNumber(child))
                         return child + '\n' + indent;
-                    return child.toString({ indent: indentCount + 1 }) + '\n' + indent;
-                }).join('');
+                    return child.toString({ indent: indentCount + 1 }) + '\n';
+                }).join('') + indent;
 
-            return children.toString();
+            if (children)
+                return children.toString();
+            return '(null)';
         }
 
         paramsToString(params) {
             return _.map(params, (val, name) => ' ' + name + '="' + val + '"').join('');
         }
 
-        toString(options) {
-            options = _.merge({
-                indent: 0,
-                params: {},
-                children: []
-            }, options);
+        toString(options = {
+            indent: 0,
+            params: {},
+            children: []
+        }) {
             let indent = this.indentToString(options.indent);
-            return `${indent}<${this.className}${this.paramsToString(options.params)}>${this.childrenToString(options.children, options.indent)}</${this.className}>`;
+            return `${indent}<${this.className}${this.paramsToString(options.params)}>${this.childrenToString(options)}</${this.className}>`;
         }
     }
     registerClass(Node);
 
-    class BlockNode extends Node {
-        constructor(children, privateProps) {
-            super(children, privateProps);
-        }
-    }
-    registerClass(BlockNode);
-
-    class RootNode extends BlockNode {
+    class RootNode extends Node {
         constructor(children) {
             super(children, {
-                _root: true/*,
-                _file: file*/
+                _root: true
             });
         }
 
-        toString(options) {
+        toString(options = { indent: 0 }) {
             return super.toString({ children: this.children, indent: _.isObject(options) ? options.indent : 0 })
         }
     }
@@ -111,9 +129,12 @@ function Nodes(registerClass) {
             });
         }
 
-        toString(options) {
+        toString(options = { indent: 0 }) {
             const indent = this.indentToString(options.indent);
-            return super.toString({ children: this.text, indent: _.isObject(options) && options.indent ? options.indent : 0 })
+            return super.toString({
+                children: this.text,
+                indent: options.indent
+            })
         }
     }
     registerClass(CommentNode);
@@ -126,15 +147,15 @@ function Nodes(registerClass) {
             });
         }
 
-        toString(options) {
+        toString(options = { indent: 0 }) {
             return super.toString({
                 children: this.value,
                 params: {
                     name: this.name,
                     type: this.value.constructor.name
                 },
-                indent: _.isObject(options) && options.indent ? options.indent : 0
-            })
+                indent: options.indent
+            });
         }
     }
     registerClass(VariableNode);
@@ -146,12 +167,10 @@ function Nodes(registerClass) {
             });
         }
 
-        toString(options) {
+        toString(options = { indent: 0 }) {
             return super.toString({
-                params: {
-                    file: this.file
-                },
-                indent: _.isObject(options) && options.indent ? options.indent : 0
+                children: this.file,
+                indent: options.indent
             })
         }
     }
@@ -163,10 +182,23 @@ function Nodes(registerClass) {
 
     class ModuleNode extends Node {
         constructor(name, params, block) {
-            super(null, {
+            super(block, {
                 _name: name,
-                _block: block,
                 _params: params
+            });
+        }
+
+        toString(options = { indent: 0 }) {
+            let params = {
+                name: this.name
+            };
+            if (this.params !== null && this.params.length > 0)
+                params.params = this.params;
+
+            return super.toString({
+                children: this.children,
+                indent: options.indent,
+                params
             });
         }
     }
@@ -174,8 +206,7 @@ function Nodes(registerClass) {
 
     class ForLoopNode extends Node {
         constructor(params, block) {
-            super(null, {
-                _block: block,
+            super(block, {
                 _params: params
             });
         }
@@ -183,29 +214,15 @@ function Nodes(registerClass) {
     registerClass(ForLoopNode);
 
     class ActionNode extends Node {
-        constructor(name, params, block) {
+        constructor(name, params = []) {
             let privateProps = {
                 _name: name,
                 _modifier: null,
                 _params: params,
                 _label: null
             };
-            if (block) {
-                privateProps._block = block;
-            }
 
-            /*            if (_.isArray(operators)) {
-                            operators = operators.trim();
-                            privateProps._operators = operators;
-                        }*/
-
-            super(null, privateProps);
-
-            /*            if (_.isArray(operators)) {
-                            _.each(operators, (operator) => {
-                                operator.parent = this;
-                            });
-                        }*/
+            super([], privateProps);
         }
 
         setModifier(modifier) {
@@ -217,6 +234,45 @@ function Nodes(registerClass) {
             this.__.label = label;
             return this;
         }
+
+        setBlock(block) {
+            this.children = block.children;
+            return this;
+        }
+
+        /*        setParams(params) {
+                    params = _.filter(params, x => !!x);
+                    if (params.length > 0 && this.__.params.length > 0)
+                        this.__.params = [];
+                    _.each(params, param => {
+                        this.__.params.push(param);
+                        param.parent = this;
+                    });
+                    return this;
+                }*/
+
+        pushParam(param) {
+            this.__.params.push(param);
+            param.parent = this;
+            return this;
+        }
+
+        toString(options = { indent: 0 }) {
+            let params = {
+                name: this.name,
+            };
+            if (this.label !== null)
+                params.label = this.label;
+            if (this.modifier !== null)
+                params.modifier = this.modifier;
+            if (this.params !== null && this.params.length > 0)
+                params.params = this.params;
+            return super.toString({
+                indent: options.indent,
+                children: this.children,
+                params
+            });
+        }
     }
     registerClass(ActionNode);
 
@@ -226,6 +282,19 @@ function Nodes(registerClass) {
                 _name: name,
                 _params: params,
                 _expression: expression
+            });
+        }
+
+        toString(options = { indent: 0 }) {
+            let params = {
+                name: this.name
+            };
+            if (this.params && this.params.length > 0)
+                params.params = this.params;
+            return super.toString({
+                children: this.expression,
+                indent: options.indent,
+                params
             });
         }
     }
@@ -259,7 +328,7 @@ function Nodes(registerClass) {
             if (this.rightExpression === null)
                 return `${this.negative ? '- ' : ''}${this.leftExpression}`;
             if (this.rightExpression !== null && this.operator !== null)
-                return `${this.negative ? '- ' : ''}${this.leftExpression}${this.operator}${this.rightExpression}`;
+                return `${this.negative ? '- ' : ''}(${this.leftExpression}${this.operator}${this.rightExpression})`;
         }
     }
     registerClass(ExpressionNode);

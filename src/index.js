@@ -1,13 +1,17 @@
 const _ = require('lodash'),
   fs = require('fs'),
+  moo = require('moo'),
   nearley = require("nearley"),
-  grammar = require("./nearley/scad-parser"),
+  grammar = require("./nearley/grammar"),
+  stateStart = require("./nearley/state-start"),
+  stateComment = require("./nearley/state-comment"),
   inspect = require('util').inspect;
 
-
-class SCADParser extends nearley.Parser {
+class SCADParser {
   constructor(useCache = true) {
-    super(grammar.ParserRules, grammar.ParserStart);
+    const nm = require('./nearley/nearley-moo').parser(nearley, grammar);
+    this.parser = nm(moo.states({start: stateStart, comment: stateComment}));
+    this.parser.ignore(['whitespace', 'eol']);
     this.useCache = useCache;
     if (useCache) {
       _.each({
@@ -42,10 +46,21 @@ class SCADParser extends nearley.Parser {
     }
   }
 
+  /*  preprocess(code) {
+      // Remove inline single line comments
+      code = code.replace(/^(.+)\/\/.*$/mg, '$1');
+      // Remove multiline comments (while keeping line count as before)
+      const mlCommentMatcher = /\/\*([\s\S]*?)\*\//g;
+      _.each(code.match(mlCommentMatcher), (match) => {
+        code = code.replace(match, _.times(match.split('\n').length, () => '\n').join(''));
+      });
+      return code;
+    }*/
+
   parse(code) {
     try {
-      this.feed(code);
-      return this.results;
+      this.parser.feed(code);
+      return this.parser.results;
     } catch (error) {
       error.location = this.offsetToLocation(code, error.offset);
       throw error;
@@ -103,26 +118,36 @@ class SCADParser extends nearley.Parser {
   }
 }
 
-/**
- * Detailed inspection of an Object
- * @param {Object} obj Object to inspect
- * @param {Boolean} showHidden Show non-enumberable properties
- * @param {Number} depth Defines how deep to inspect the object of interest
- * @returns {String} String with inspection result
- */
-const inspectObject = (obj, showHidden = true, depth = 10) => inspect(obj, showHidden, depth, true);
+module.export = SCADParser;
 
-
-// If called directly try to parse an example
+// If we run as program try to parse an example
 if (!module.parent) {
+  /**
+   * Detailed inspection of an Object
+   * @param {Object} obj Object to inspect
+   * @param {Boolean} showHidden Show non-enumberable properties
+   * @param {Number} depth Defines how deep to inspect the object of interest
+   * @returns {String} String with inspection result
+   */
+  const inspectObject = (obj, showHidden = true, depth = 5) => inspect(obj, showHidden, depth, true);
+
   const parser = new SCADParser();
   try {
-    const ast = parser.getAST('../examples/ex4.scad');
-    console.log(inspectObject(ast.children));
+    let index = process.argv[2] || 3;
+    const ast = parser.getAST('../examples/ex' + index + '.scad');
+    console.log(ast);
     console.log(ast.toString());
+/*    console.log(inspectObject(_.filter(ast, (c) => {
+      if(c === null)
+        return false;
+      return true;
+    })));*/
+    console.log('done');
   } catch (error) {
-    console.log(inspectObject(error));
+    console.log(error);
+  }
+
+  while (process.argv[2] && true) {
+    console.log('.');
   }
 }
-else
-  module.exports = SCADParser;

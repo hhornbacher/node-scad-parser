@@ -1,5 +1,5 @@
 myNumber = 3.667;
-x=(z+3)+(3+2);
+x=(z+3)+3;
 MyString = "Hallo";
 
 aVector= [0,5, [3.2, MyString], -200.001, "STRING"];
