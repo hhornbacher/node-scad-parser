@@ -65,7 +65,7 @@ class SCADParser {
         // Feed the token to the parser
         parser.feed([token]);
       }
-      return parser.results;
+      return new RootNode(parser.results[0]);
     } catch (error) {
       // Get last lexed token
       const last = tokens[tokens.length - 1];
@@ -135,7 +135,7 @@ if (!module.parent) {
 
   const parser = new SCADParser();
   try {
-    let index = process.argv[2] || 3;
+    let index = process.argv[2] || 1;
     const ast = parser.parseAST('../examples/ex' + index + '.scad');
     console.log(ast.toString());
     /*    console.log(inspectObject(_.filter(ast, (c) => {

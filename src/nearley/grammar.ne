@@ -7,11 +7,6 @@ require('../ast');
  
 @builtin "whitespace.ne"
 
-
-RootNode ->
-	Block {% d => new RootNode(d[0]) %}
-
-
 Block -> 
 	Statement
 	| Block Statement {% d => _.concat(d[0], d[1]) %}

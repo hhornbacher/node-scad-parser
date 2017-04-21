@@ -16,7 +16,6 @@ var grammar = {
     {"name": "__$ebnf$1", "symbols": ["__$ebnf$1", "wschar"], "postprocess": function arrpush(d) {return d[0].concat([d[1]]);}},
     {"name": "__", "symbols": ["__$ebnf$1"], "postprocess": function(d) {return null;}},
     {"name": "wschar", "symbols": [/[ \t\n\v\f]/], "postprocess": id},
-    {"name": "RootNode", "symbols": ["Block"], "postprocess": d => new RootNode(d[0])},
     {"name": "Block", "symbols": ["Statement"]},
     {"name": "Block", "symbols": ["Block", "Statement"], "postprocess": d => _.concat(d[0], d[1])},
     {"name": "Statement", "symbols": [comment], "postprocess": d => new CommentNode(d[0], d[0].value)},
@@ -76,7 +75,7 @@ var grammar = {
     {"name": "Argument", "symbols": ["Expression"], "postprocess": id},
     {"name": "Argument", "symbols": [identifier, assign, "Expression"], "postprocess": d => ([d[0], d[4]])}
 ]
-  , ParserStart: "RootNode"
+  , ParserStart: "Block"
 }
 if (typeof module !== 'undefined'&& typeof module.exports !== 'undefined') {
    module.exports = grammar;
