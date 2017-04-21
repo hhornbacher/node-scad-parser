@@ -85,10 +85,12 @@ function Nodes(registerClass) {
                         return '(null)\n' + indent;
                     if (_.isNumber(child))
                         return child + '\n' + indent;
-                    return child.toString({ indent: indentCount+1 }) + '\n';
-                }).join('')  + indent;
+                    return child.toString({ indent: indentCount + 1 }) + '\n';
+                }).join('') + indent;
 
-            return children.toString();
+            if (children)
+                return children.toString();
+            return '(null)';
         }
 
         paramsToString(params) {
@@ -212,7 +214,7 @@ function Nodes(registerClass) {
     registerClass(ForLoopNode);
 
     class ActionNode extends Node {
-        constructor(name, params=[]) {
+        constructor(name, params = []) {
             let privateProps = {
                 _name: name,
                 _modifier: null,
@@ -238,16 +240,16 @@ function Nodes(registerClass) {
             return this;
         }
 
-/*        setParams(params) {
-            params = _.filter(params, x => !!x);
-            if (params.length > 0 && this.__.params.length > 0)
-                this.__.params = [];
-            _.each(params, param => {
-                this.__.params.push(param);
-                param.parent = this;
-            });
-            return this;
-        }*/
+        /*        setParams(params) {
+                    params = _.filter(params, x => !!x);
+                    if (params.length > 0 && this.__.params.length > 0)
+                        this.__.params = [];
+                    _.each(params, param => {
+                        this.__.params.push(param);
+                        param.parent = this;
+                    });
+                    return this;
+                }*/
 
         pushParam(param) {
             this.__.params.push(param);
@@ -287,7 +289,7 @@ function Nodes(registerClass) {
             let params = {
                 name: this.name
             };
-            if (this.params !== null && this.params.length > 0)
+            if (this.params && this.params.length > 0)
                 params.params = this.params;
             return super.toString({
                 children: this.expression,
