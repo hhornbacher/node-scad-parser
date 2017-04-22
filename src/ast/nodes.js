@@ -122,11 +122,7 @@ function Nodes(registerClass) {
         /**
          * Get string representation of this node
          * 
-         * @param {Object} [options={
-         *             indent: 0,
-         *             params: {},
-         *             children: []
-         *         }] 
+         * @param {Object} [options={ indent: 0, params: {}, children: []}] 
          * @returns [String}
          */
         toString(options = {
