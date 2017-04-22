@@ -22,11 +22,14 @@
   },
   "devDependencies": {
     "docdash": "^0.4.0",
+    "expect.js": "^0.3.1",
+    "istanbul": "^0.4.5",
     "jsdoc": "^3.4.3",
     "mocha": "^3.2.0"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified yet\" && exit 1",
+    "test": "istanbul cover _mocha src/test.js",
+    "generate-covreport": "istanbul report html",
     "generate-docs": "jsdoc -c jsdoc.json"
   },
   "homepage": "https://github.com/hhornbacher/node-scad-parser#readme",
