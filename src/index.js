@@ -10,6 +10,9 @@ const _ = require('lodash'),
 const parser = new nearley.Parser(grammar.ParserRules, grammar.ParserStart);
 const lexer = moo.states({ start: stateStart, comment: stateComment });
 
+/**
+ * Parser for OpenSCAD code
+ */
 class SCADParser {
   constructor() {
     this.ignoredTokens = ['whitespace', 'eol'];
@@ -45,6 +48,15 @@ class SCADParser {
       });
   }
 
+  /**
+   * Parse the supplied code
+   * 
+   * @param {string} code Cointains the code to be parsed
+   * @param {string} file Name of the parsed file
+   * @returns {RootNode} Root node of the code's AST
+   * 
+   * @memberOf SCADParser
+   */
   parse(code, file) {
     let tokens = [];
     try {
@@ -88,11 +100,20 @@ class SCADParser {
       }
       throw error;
     }
-  }
-
+  } 
+ 
+  /**
+   * Parse the abstract syntax tree
+   * 
+   * @param {string} file Path to the code file
+   * @param {string} [code=null] Code of the file to parse (Only supplied, if the file content was read before)
+   * @returns {RootNode} Root node of the code's AST
+   * 
+   * @memberOf SCADParser
+   */
   parseAST(file, code = null) {
-    if (this.cache[file])
-      return cache[file];
+    /*    if (this.cache[file])
+          return this.cache[file];*/
 
     if (!_.isString(file) && !_.isString(code))
       throw new Error('You have to pass either code or file parameter!');
@@ -111,6 +132,16 @@ class SCADParser {
     return this.cache[file];
   }
 
+  /**
+   * Get an except of the code file
+   * 
+   * @param {string} file Path to the code file
+   * @param {Location} location Location of interest
+   * @param {number} [lines=3] Coount of lines to print before and after the line of interest
+   * @returns {string} The code excerpt string
+   * 
+   * @memberOf SCADParser
+   */
   getCodeExcerpt(file, location, lines = 3) {
     if (!this.codeCache[file]) {
       let code = fs.readFileSync(file, 'utf8');
@@ -126,15 +157,6 @@ module.exports = SCADParser;
 
 // If we run as program try to parse an example
 if (!module.parent) {
-  /**
-   * Detailed inspection of an Object
-   * @param {Object} obj Object to inspect
-   * @param {Boolean} showHidden Show non-enumberable properties
-   * @param {Number} depth Defines how deep to inspect the object of interest
-   * @returns {String} String with inspection result
-   */
-  const inspectObject = (obj, showHidden = true, depth = 5) => inspect(obj, showHidden, depth, true);
-
   const parser = new SCADParser();
   try {
     let index = process.argv[2] || 1;

@@ -1,3 +1,7 @@
+/**
+ * Lexer state: Multiline comment
+ * @module nearley/state-comment
+ */
 const moo = require('moo');
 
 module.exports = {

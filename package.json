@@ -4,7 +4,8 @@
   "description": "Module to parse the abstract syntax tree of OpenSCAD files",
   "main": "./src/index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified yet\" && exit 1"
+    "test": "echo \"Error: no test specified yet\" && exit 1",
+    "generate-docs": "jsdoc -c jsdoc.json"
   },
   "repository": {
     "type": "git",
@@ -20,5 +21,9 @@
   "bugs": {
     "url": "https://github.com/hhornbacher/node-scad-parser/issues"
   },
-  "homepage": "https://github.com/hhornbacher/node-scad-parser#readme"
+  "homepage": "https://github.com/hhornbacher/node-scad-parser#readme",
+  "devDependencies": {
+    "docdash": "^0.4.0",
+    "jsdoc": "^3.4.3"
+  }
 }

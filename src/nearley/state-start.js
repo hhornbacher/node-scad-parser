@@ -1,3 +1,7 @@
+/**
+ * Lexer state: Start (Default state)
+ * @module nearley/state-start
+ */
 const moo = require('moo');
 
 module.exports = {

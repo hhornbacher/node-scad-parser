@@ -1,7 +1,21 @@
+/**
+ * Abstract nodes of the scad language
+ * @module ast/nodes
+ */
 const _ = require('lodash');
 
 function Nodes(registerClass) {
 
+    /**
+     * Node base class
+     * 
+     * @class Node
+     * @extends {SCADBaseClass}
+     * 
+     * @param {Array.Node} children Children of this node
+     * @param {any} [privateProps={}] Private properties of this node
+     * @param {any} token The token of this node
+     */
     class Node extends SCADBaseClass {
         constructor(children, privateProps = {}, token) {
             privateProps = _.merge({
@@ -26,18 +40,22 @@ function Nodes(registerClass) {
             }
         }
 
+        /**
+         * Get the name of this class
+         * 
+         * @readonly
+         * @returns [String} Name of the constructor
+         */
         get className() {
             return this.constructor.name;
         }
 
-        isType(type = 'Node') {
-            if (_.isString(type))
-                return (new RegExp(type)).test(this.className);
-            if (type.prototype)
-                return (new RegExp(type.name)).test(this.className);
-            throw Error('Wrong parameter type!');
-        }
-
+        /**
+         * Set the children of this node
+         * 
+         * @param {Array.Node} children Children of this node
+         * @returns {Node} this
+         */
         setChildren(children) {
             children = _.filter(children, x => !!x);
             if (children.length > 0 && this.__.children.length > 0)
@@ -49,29 +67,22 @@ function Nodes(registerClass) {
             return this;
         }
 
-        pushChild(child) {
-            if (!_.isArray(this.__.children))
-                this.__.children = [];
-
-            this.__.children.push(child);
-            child.parent = this;
-
-            return this;
-        }
-
-        getChildrenOfType(type) {
-            if (!this.children)
-                return null;
-            if (!type)
-                return this.children;
-
-            return _.find(this.children, (child) => child.isType(type));
-        }
-
+        /**
+         * Create a string with count whitespaces
+         * 
+         * @param {number} count Count of whitespaces
+         * @returns [String}
+         */
         indentToString(count) {
             return _.times(count * 2, () => ' ').join('');
         }
 
+        /**
+         * Get string representation of children
+         * 
+         * @param {Object} options Options for outputting the children
+         * @returns [String}
+         */
         childrenToString(options) {
             let { indent: indentCount, children } = options;
             let indent = this.indentToString(indentCount);
@@ -98,10 +109,26 @@ function Nodes(registerClass) {
             return '(null)';
         }
 
+        /**
+         * Get string representation of params
+         * 
+         * @param {array} params Params to convert
+         * @returns [String}
+         */
         paramsToString(params) {
             return _.map(params, (val, name) => ' ' + name + '="' + val + '"').join('');
         }
 
+        /**
+         * Get string representation of this node
+         * 
+         * @param {Object} [options={
+         *             indent: 0,
+         *             params: {},
+         *             children: []
+         *         }] 
+         * @returns [String}
+         */
         toString(options = {
             indent: 0,
             params: {},
@@ -113,6 +140,14 @@ function Nodes(registerClass) {
     }
     registerClass(Node);
 
+    /**
+     * Root node of an AST
+     * 
+     * @class RootNode
+     * @extends {Node}
+     * 
+     * @param {Array.Node} children Children of this node
+     */
     class RootNode extends Node {
         constructor(children) {
             super(children, {
@@ -120,12 +155,28 @@ function Nodes(registerClass) {
             }, null);
         }
 
+        /**
+         * Get string representation of this node
+         * 
+         * @param {Object} [options={ indent: 0 }] 
+         * @returns [String}
+         */
         toString(options = { indent: 0 }) {
             return super.toString({ children: this.children, indent: _.isObject(options) ? options.indent : 0 })
         }
     }
     registerClass(RootNode);
 
+    /**
+     * Code comment
+     * 
+     * @class CommentNode
+     * @extends {Node}
+     * 
+     * @param {any} token 
+     * @param {any} text 
+     * @param {boolean} [multiline=false] 
+     */
     class CommentNode extends Node {
         constructor(token, text, multiline = false) {
             super(null, {
@@ -134,6 +185,12 @@ function Nodes(registerClass) {
             }, token);
         }
 
+        /**
+         * Get string representation of this node
+         * 
+         * @param {Object} [options={ indent: 0 }] 
+         * @returns [String}
+         */
         toString(options = { indent: 0 }) {
             const indent = this.indentToString(options.indent);
             return super.toString({
@@ -144,6 +201,16 @@ function Nodes(registerClass) {
     }
     registerClass(CommentNode);
 
+    /**
+     * Variable definition
+     * 
+     * @class VariableNode
+     * @extends {Node}
+     * 
+     * @param {any} token 
+     * @param {any} name 
+     * @param {any} value 
+     */
     class VariableNode extends Node {
         constructor(token, name, value) {
             super(null, {
@@ -152,6 +219,12 @@ function Nodes(registerClass) {
             }, token);
         }
 
+        /**
+         * Get string representation of this node
+         * 
+         * @param {Object} [options={ indent: 0 }] 
+         * @returns [String}
+         */
         toString(options = { indent: 0 }) {
             return super.toString({
                 children: this.value,
@@ -165,6 +238,15 @@ function Nodes(registerClass) {
     }
     registerClass(VariableNode);
 
+    /**
+     * Include statement
+     * 
+     * @class IncludeNode
+     * @extends {Node}
+     * 
+     * @param {any} token 
+     * @param {any} file 
+     */
     class IncludeNode extends Node {
         constructor(token, file) {
             super(null, {
@@ -172,6 +254,12 @@ function Nodes(registerClass) {
             }, token);
         }
 
+        /**
+         * Get string representation of this node
+         * 
+         * @param {Object} [options={ indent: 0 }] 
+         * @returns [String}
+         */
         toString(options = { indent: 0 }) {
             return super.toString({
                 children: this.file,
@@ -181,10 +269,27 @@ function Nodes(registerClass) {
     }
     registerClass(IncludeNode);
 
+    /**
+     * Use statement
+     * 
+     * @class UseNode
+     * @extends {IncludeNode}
+     */
     class UseNode extends IncludeNode {
     }
     registerClass(UseNode);
 
+    /**
+     * Module definition
+     * 
+     * @class ModuleNode
+     * @extends {Node}
+     * 
+     * @param {any} token 
+     * @param {any} name 
+     * @param {any} params 
+     * @param {any} block 
+     */
     class ModuleNode extends Node {
         constructor(token, name, params, block) {
             super(block, {
@@ -193,6 +298,12 @@ function Nodes(registerClass) {
             }, token);
         }
 
+        /**
+         * Get string representation of this node
+         * 
+         * @param {Object} [options={ indent: 0 }] 
+         * @returns [String}
+         */
         toString(options = { indent: 0 }) {
             let params = {
                 name: this.name
@@ -209,6 +320,16 @@ function Nodes(registerClass) {
     }
     registerClass(ModuleNode);
 
+    /**
+     * For loop statement
+     * 
+     * @class ForLoopNode
+     * @extends {Node}
+     * 
+     * @param {any} token 
+     * @param {any} params 
+     * @param {any} block 
+     */
     class ForLoopNode extends Node {
         constructor(token, params, block) {
             super(block, {
@@ -218,6 +339,16 @@ function Nodes(registerClass) {
     }
     registerClass(ForLoopNode);
 
+    /**
+     * Action call statement
+     * 
+     * @class ActionNode
+     * @extends {Node}
+     * 
+     * @param {any} token 
+     * @param {any} name 
+     * @param {any} [params=[]] 
+     */
     class ActionNode extends Node {
         constructor(token, name, params = []) {
             let privateProps = {
@@ -230,38 +361,25 @@ function Nodes(registerClass) {
             super([], privateProps, token);
         }
 
-        setModifier(modifier) {
-            this.__.modifier = modifier;
-            return this;
-        }
-
+        /**
+         * Set a label
+         * 
+         * @param {string} label 
+         * @returns {ActionNode} this
+         * 
+         * @memberOf ActionNode
+         */
         setLabel(label) {
             this.__.label = label;
             return this;
         }
 
-        setBlock(block) {
-            this.children = block.children;
-            return this;
-        }
-
-        /*        setParams(params) {
-                    params = _.filter(params, x => !!x);
-                    if (params.length > 0 && this.__.params.length > 0)
-                        this.__.params = [];
-                    _.each(params, param => {
-                        this.__.params.push(param);
-                        param.parent = this;
-                    });
-                    return this;
-                }*/
-
-        pushParam(param) {
-            this.__.params.push(param);
-            param.parent = this;
-            return this;
-        }
-
+        /**
+         * Get string representation of this node
+         * 
+         * @param {Object} [options={ indent: 0 }] 
+         * @returns [String}
+         */
         toString(options = { indent: 0 }) {
             let params = {
                 name: this.name,
@@ -281,6 +399,17 @@ function Nodes(registerClass) {
     }
     registerClass(ActionNode);
 
+    /**
+     * Function definition
+     * 
+     * @class FunctionNode
+     * @extends {Node}
+     * 
+     * @param {any} token 
+     * @param {any} name 
+     * @param {any} params 
+     * @param {any} expression 
+     */
     class FunctionNode extends Node {
         constructor(token, name, params, expression) {
             super(null, {
@@ -290,6 +419,12 @@ function Nodes(registerClass) {
             }, token);
         }
 
+        /**
+         * Get string representation of this node
+         * 
+         * @param {Object} [options={ indent: 0 }] 
+         * @returns [String}
+         */
         toString(options = { indent: 0 }) {
             let params = {
                 name: this.name
@@ -305,6 +440,17 @@ function Nodes(registerClass) {
     }
     registerClass(FunctionNode);
 
+    /**
+     * Expression
+     * 
+     * @class ExpressionNode
+     * @extends {Node}
+     * 
+     * @param {any} leftExpression 
+     * @param {any} [rightExpression=null] 
+     * @param {any} [operator=null] 
+     * @param {boolean} [negative=false] 
+     */
     class ExpressionNode extends Node {
         constructor(leftExpression, rightExpression = null, operator = null, negative = false) {
             super(null, {
@@ -322,11 +468,23 @@ function Nodes(registerClass) {
             }
         }
 
+        /**
+         * Turn this expression negative
+         * 
+         * @param {Boolean} neg 
+         * @returns {ReferenceValue} this
+         */
         setNegative(neg) {
             this.__.negative = neg;
             return this;
         }
 
+        /**
+         * Get string representation of this node
+         * 
+         * @param {Object} [options={ indent: 0 }] 
+         * @returns [String}
+         */
         toString() {
             if (this.rightExpression === null)
                 return `${this.negative ? '- ' : ''}${this.leftExpression}`;

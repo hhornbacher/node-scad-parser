@@ -1,5 +1,10 @@
 @{% 
 	
+/**
+ * Nearley SCAD grammar
+ * @module nearley/grammar
+ */
+
 require('./tokens');
 require('../ast');
 

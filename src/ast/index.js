@@ -1,3 +1,7 @@
+/**
+ * Abstract syntax representation of the scad language
+ * @module ast
+ */
 const _ = require('lodash'),
     inspect = require('util').inspect;
 
@@ -14,6 +18,8 @@ const registerClass = function (cl, name) {
 
 /**
  * Detailed inspection of an Object
+ * 
+ * @global
  * @param {Object} obj Object to inspect
  * @param {Boolean} showHidden Show non-enumberable properties
  * @param {Number} depth Defines how deep to inspect the object of interest
@@ -26,16 +32,12 @@ global.inspectObject = inspectObject;
 // Register lodash as global
 registerClass(_, '_');
 
-Array.prototype.push = (function () {
-    var original = Array.prototype.push;
-    return function () {
-        original.apply(this, arguments);
-        return this;
-    };
-})();
-
 /**
  * Base class for all AST related classes
+ * 
+ * @class SCADBaseClass
+ * @param {Object} privateProperties Define private properties, that will be hidden inside `this.__`
+ * 
  */
 class SCADBaseClass {
     constructor(privateProperties) {
@@ -75,6 +77,13 @@ class SCADBaseClass {
 }
 registerClass(SCADBaseClass);
 
+/**
+ * Location in the code
+ * 
+ * @class Location
+ * 
+ * @param {Token} token The token from which to get the positional information
+ */
 class Location {
     constructor({ offset, size, lineBreaks, line, col }) {
         this.offset = offset;
@@ -89,9 +98,6 @@ class Location {
     }
 }
 registerClass(Location);
-
-// Register error classes as global
-require('./errors')(registerClass);
 
 // Register value classes as global
 require('./values')(registerClass);

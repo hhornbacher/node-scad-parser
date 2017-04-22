@@ -4,6 +4,11 @@
 function id(x) {return x[0]; }
  
 	
+/**
+ * Nearley SCAD grammar
+ * @module nearley/grammar
+ */
+
 require('./tokens');
 require('../ast');
 

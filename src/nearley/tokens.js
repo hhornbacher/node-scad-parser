@@ -1,3 +1,7 @@
+/**
+ * Prepare and initialize tokens to be used in the grammar
+ * @module nearley/tokens
+ */
 const stateStart = require('./state-start'),
     stateComment = require('./state-comment');
 
