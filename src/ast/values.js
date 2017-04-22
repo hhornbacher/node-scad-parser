@@ -3,7 +3,7 @@
  * @module ast/values
  */
 const _ = require('lodash');
-
+ 
 function Values(registerClass) {
 
     /**
@@ -17,11 +17,8 @@ function Values(registerClass) {
      */
     class NumberValue extends Number {
         constructor(token, value) {
-            if (_.isString(value))
-                value = parseFloat(value);
-            super(value);
-            _.extend(this, new SCADBaseClass());
-            this.location = token ? new Location(token) : null;
+            super(parseFloat(value));
+            this.location = new Location(token);
         }
     }
     registerClass(NumberValue);
@@ -38,8 +35,7 @@ function Values(registerClass) {
     class BooleanValue extends Boolean {
         constructor(token, value) {
             super(value);
-            _.extend(this, new SCADBaseClass());
-            this.location = token ? new Location(token) : null;
+            this.location = new Location(token);
         }
     }
     registerClass(BooleanValue);
@@ -56,8 +52,7 @@ function Values(registerClass) {
     class StringValue extends String {
         constructor(token, value) {
             super(value);
-            _.extend(this, new SCADBaseClass());
-            this.location = token ? new Location(token) : null;
+            this.location = new Location(token);
         }
     }
     registerClass(StringValue);
@@ -66,15 +61,13 @@ function Values(registerClass) {
      * Vector type
      * 
      * @class VectorValue
-     * @extends {SCADBaseClass}
      * 
      * @param {Token} token The lexed token from moo
      * @param {array} value The value
      */
-    class VectorValue extends SCADBaseClass {
+    class VectorValue {
         constructor(token, value) {
-            super();
-            this.location = token ? new Location(token) : null;
+            this.location = new Location(token);
             this.value = value;
         }
 
@@ -93,17 +86,15 @@ function Values(registerClass) {
      * Range type
      * 
      * @class RangeValue
-     * @extends {SCADBaseClass}
      * 
      * @param {Token} token The lexed token from moo
      * @param {NumberValue} start Start of the range
      * @param {NumberValue} end End of the range
      * @param {NumberValue} [increment=new NumberValue(1)] Increment step size (default: `0`)
      */
-    class RangeValue extends SCADBaseClass {
+    class RangeValue {
         constructor(token, start, end, increment = new NumberValue(1)) {
-            super();
-            this.location = token ? new Location(token) : null;
+            this.location = new Location(token);
             this.start = start;
             this.end = end;
             this.increment = increment;
@@ -124,16 +115,14 @@ function Values(registerClass) {
      * Reference type
      * 
      * @class ReferenceValue
-     * @extends {SCADBaseClass}
      * 
      * @param {Token} token The lexed token from moo
      * @param {any} reference The referenced identifier
      * @param {boolean} [negative=false] Negativity flag
      */
-    class ReferenceValue extends SCADBaseClass {
+    class ReferenceValue {
         constructor(token, reference, negative = false) {
-            super();
-            this.location = token ? new Location(token) : null;
+            this.location = new Location(token);
             this.negative = negative;
             this.reference = reference;
         }

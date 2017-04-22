@@ -10,34 +10,24 @@ function Nodes(registerClass) {
      * Node base class
      * 
      * @class Node
-     * @extends {SCADBaseClass}
      * 
      * @param {Array.Node} children Children of this node
      * @param {any} [privateProps={}] Private properties of this node
      * @param {any} token The token of this node
      */
-    class Node extends SCADBaseClass {
-        constructor(children, privateProps = {}, token) {
-            privateProps = _.merge({
-                parent: null
-            }, privateProps);
-
+    class Node {
+        constructor(children, token) {
             if (_.isArray(children)) {
                 children = _.filter(children, x => !!x);
-                privateProps._children = children;
-            }
-            else
-                privateProps._children = [];
-
-            super(privateProps);
-
-            this.location = token ? new Location(token) : null;
-
-            if (_.isArray(children)) {
                 _.each(children, (child) => {
                     child.parent = this;
                 });
+                this.children = children;
             }
+            else
+                this.children = [];
+
+            this.location = token ? new Location(token) : null;
         }
 
         /**
@@ -58,9 +48,9 @@ function Nodes(registerClass) {
          */
         setChildren(children) {
             children = _.filter(children, x => !!x);
-            this.__.children = [];
+            this.children = [];
             _.each(children, child => {
-                this.__.children.push(child);
+                this.children.push(child);
                 child.parent = this;
             });
             return this;
@@ -145,9 +135,7 @@ function Nodes(registerClass) {
      */
     class RootNode extends Node {
         constructor(children) {
-            super(children, {
-                _root: true
-            }, null);
+            super(children, null);
         }
 
         /**
@@ -157,7 +145,7 @@ function Nodes(registerClass) {
          * @returns [String}
          */
         toString(options = { indent: 0 }) {
-            return super.toString({ children: this.children, indent: _.isObject(options) ? options.indent : 0 })
+            return super.toString({ children: this.children, indent: options.indent })
         }
     }
     registerClass(RootNode);
@@ -174,10 +162,9 @@ function Nodes(registerClass) {
      */
     class CommentNode extends Node {
         constructor(token, text, multiline = false) {
-            super(null, {
-                _text: multiline ? text : text.trim(),
-                _multiline: multiline
-            }, token);
+            super(null, token);
+            this.text = multiline ? text : text.trim();
+            this.multiline = multiline;
         }
 
         /**
@@ -208,10 +195,9 @@ function Nodes(registerClass) {
      */
     class VariableNode extends Node {
         constructor(token, name, value) {
-            super(null, {
-                _name: name,
-                _value: value
-            }, token);
+            super(null, token);
+            this.name = name;
+            this.value = value;
         }
 
         /**
@@ -244,9 +230,8 @@ function Nodes(registerClass) {
      */
     class IncludeNode extends Node {
         constructor(token, file) {
-            super(null, {
-                _file: file
-            }, token);
+            super(null, token);
+            this.file = file;
         }
 
         /**
@@ -287,10 +272,9 @@ function Nodes(registerClass) {
      */
     class ModuleNode extends Node {
         constructor(token, name, params, block) {
-            super(block, {
-                _name: name,
-                _params: params
-            }, token);
+            super(block, token);
+            this.name = name;
+            this.params = params;
         }
 
         /**
@@ -327,9 +311,8 @@ function Nodes(registerClass) {
      */
     class ForLoopNode extends Node {
         constructor(token, params, block) {
-            super(block, {
-                _params: params
-            });
+            super(block, token);
+            this.params = params;
         }
     }
     registerClass(ForLoopNode);
@@ -346,14 +329,10 @@ function Nodes(registerClass) {
      */
     class ActionNode extends Node {
         constructor(token, name, params = []) {
-            let privateProps = {
-                _name: name,
-                _modifier: null,
-                _params: params,
-                _label: null
-            };
-
-            super([], privateProps, token);
+            super(null, token);
+            this.name = name.replace(/([!#\*\%]?)(.*)/, '$2');
+            this.modifier = name.replace(/([!#\*\%]?)(.*)/, '$1');
+            this.params = params;
         }
 
         /**
@@ -365,7 +344,7 @@ function Nodes(registerClass) {
          * @memberOf ActionNode
          */
         setLabel(label) {
-            this.__.label = label;
+            this.label = label;
             return this;
         }
 
@@ -407,11 +386,10 @@ function Nodes(registerClass) {
      */
     class FunctionNode extends Node {
         constructor(token, name, params, expression) {
-            super(null, {
-                _name: name,
-                _params: params,
-                _expression: expression
-            }, token);
+            super(null, token);
+            this.name = name;
+            this.params = params;
+            this.expression = expression;
         }
 
         /**
@@ -448,12 +426,12 @@ function Nodes(registerClass) {
      */
     class ExpressionNode extends Node {
         constructor(leftExpression, rightExpression = null, operator = null, negative = false) {
-            super(null, {
-                _leftExpression: leftExpression,
-                _rightExpression: rightExpression,
-                _operator: operator,
-                _negative: negative
-            }, null);
+            super(null, null);
+
+            this.leftExpression = leftExpression;
+            this.rightExpression = rightExpression;
+            this.operator = operator;
+            this.negative = negative;
 
             if (leftExpression.constructor.name === 'ExpressionNode') {
                 leftExpression.parent = this;
@@ -470,7 +448,7 @@ function Nodes(registerClass) {
          * @returns {ReferenceValue} this
          */
         setNegative(neg) {
-            this.__.negative = neg;
+            this.negative = neg;
             return this;
         }
 

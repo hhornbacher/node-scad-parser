@@ -131,11 +131,6 @@ if (!module.parent) {
     let index = process.argv[2] || 1;
     const ast = parser.parseAST('../examples/ex' + index + '.scad');
     console.log(ast.toString());
-    /*    console.log(inspectObject(_.filter(ast, (c) => {
-          if(c === null)
-            return false;
-          return true;
-        })));*/
     console.log('done');
   } catch (error) {
     console.log(error);
