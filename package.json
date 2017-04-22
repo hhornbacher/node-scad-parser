@@ -3,7 +3,14 @@
   "version": "1.0.2",
   "description": "Module to parse the abstract syntax tree of OpenSCAD files",
   "keywords": [
-    "openscad", "cad", "modeling", "3d", "scad", "parser", "lexer", "ast"
+    "openscad",
+    "cad",
+    "modeling",
+    "3d",
+    "scad",
+    "parser",
+    "lexer",
+    "ast"
   ],
   "main": "./src/index.js",
   "author": "Harry Hornbacher <harry@harry-hornbacher.de>",
@@ -15,10 +22,13 @@
   },
   "devDependencies": {
     "docdash": "^0.4.0",
-    "jsdoc": "^3.4.3"
+    "expect.js": "^0.3.1",
+    "istanbul": "^0.4.5",
+    "jsdoc": "^3.4.3",
+    "mocha": "^3.2.0"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified yet\" && exit 1",
+    "test": "istanbul cover _mocha src/test.js",
     "generate-docs": "jsdoc -c jsdoc.json"
   },
   "homepage": "https://github.com/hhornbacher/node-scad-parser#readme",

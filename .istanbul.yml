@@ -1,0 +1,8 @@
+verbose: false
+instrumentation:
+    root: ./src
+    extensions:
+        - .js
+    excludes:
+        - test.js
+    embed-source: false
