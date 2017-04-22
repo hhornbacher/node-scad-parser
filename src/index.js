@@ -98,8 +98,10 @@ class SCADParser {
       throw new Error('You have to pass either code or file parameter!');
 
     let result;
-    if (code)
-      [result] = this.getCode(file, code);
+    if (code) {
+      this.codeCache[file] = code;
+      this.cache[file] = this.parse(code, file);
+    }
     else {
       let code = fs.readFileSync(file, 'utf8');
       this.codeCache[file] = code;
@@ -115,7 +117,7 @@ class SCADParser {
       this.codeCache[file] = code;
     }
     let code = this.codeCache[file].split('\n');
-    code = code.slice(location.line-(lines+2), location.line+(lines-1));
+    code = code.slice(location.line - (lines + 2), location.line + (lines - 1));
     return code.join('\n');
   }
 }
