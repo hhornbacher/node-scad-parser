@@ -29,7 +29,6 @@
   },
   "scripts": {
     "test": "istanbul cover _mocha src/test.js",
-    "generate-covreport": "istanbul report html",
     "generate-docs": "jsdoc -c jsdoc.json"
   },
   "homepage": "https://github.com/hhornbacher/node-scad-parser#readme",
