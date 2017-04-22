@@ -28,7 +28,8 @@
     "mocha": "^3.2.0"
   },
   "scripts": {
-    "test": "istanbul cover _mocha src/test.js",
+    "test": "istanbul cover _mocha src/test.js -- --perf-basic-prof",
+    "live-test": "mocha --watch src/test.js",
     "generate-docs": "jsdoc -c jsdoc.json"
   },
   "homepage": "https://github.com/hhornbacher/node-scad-parser#readme",
