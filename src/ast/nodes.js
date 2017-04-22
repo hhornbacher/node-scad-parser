@@ -58,8 +58,7 @@ function Nodes(registerClass) {
          */
         setChildren(children) {
             children = _.filter(children, x => !!x);
-            if (children.length > 0 && this.__.children.length > 0)
-                this.__.children = [];
+            this.__.children = [];
             _.each(children, child => {
                 this.__.children.push(child);
                 child.parent = this;

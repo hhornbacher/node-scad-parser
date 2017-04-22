@@ -7,7 +7,6 @@ const _ = require('lodash'),
   stateComment = require("./nearley/state-comment"),
   inspect = require('util').inspect;
 
-const parser = new nearley.Parser(grammar.ParserRules, grammar.ParserStart);
 const lexer = moo.states({ start: stateStart, comment: stateComment });
 
 /**
@@ -17,7 +16,7 @@ class SCADParser {
   constructor() {
     this.ignoredTokens = ['whitespace', 'eol'];
     this.results = null;
-    this.cache =[];
+    this.cache = [];
     this.codeCache = [];
   }
 
@@ -33,6 +32,7 @@ class SCADParser {
   parse(code, file) {
     let tokens = [];
     try {
+      const parser = new nearley.Parser(grammar.ParserRules, grammar.ParserStart);
       let token;
 
       // Feed whole code to lexer
@@ -73,8 +73,8 @@ class SCADParser {
       }
       throw error;
     }
-  } 
- 
+  }
+
   /**
    * Parse the abstract syntax tree
    * 
@@ -116,10 +116,6 @@ class SCADParser {
    * @memberOf SCADParser
    */
   getCodeExcerpt(file, location, lines = 3) {
-    if (!this.codeCache[file]) {
-      let code = fs.readFileSync(file, 'utf8');
-      this.codeCache[file] = code;
-    }
     let code = this.codeCache[file].split('\n');
     code = code.slice(location.line - (lines + 2), location.line + (lines - 1));
     return code.join('\n');
