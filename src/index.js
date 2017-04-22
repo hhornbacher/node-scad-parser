@@ -120,7 +120,7 @@ class SCADParser {
   }
 }
 
-module.export = SCADParser;
+module.exports = SCADParser;
 
 // If we run as program try to parse an example
 if (!module.parent) {
