@@ -17,35 +17,8 @@ class SCADParser {
   constructor() {
     this.ignoredTokens = ['whitespace', 'eol'];
     this.results = null;
-    _.each({
-      cache: [],
-      codeCache: [],
-    },
-      (value, key) => {
-        let readOnly = /^_.*/.test(key);
-
-        if (readOnly) {
-          key = key.replace('_', '');
-        }
-
-        const privateName = '_' + key;
-
-        this[privateName] = value;
-
-        let options = {
-          enumerable: true,
-          get: () => {
-            return this[privateName];
-          }
-        };
-
-        if (!readOnly)
-          options.set = (val) => {
-            this[privateName] = val;
-          };
-
-        Object.defineProperty(this, key, options);
-      });
+    this.cache =[];
+    this.codeCache = [];
   }
 
   /**
