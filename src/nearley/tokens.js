@@ -2,17 +2,10 @@
  * Prepare and initialize tokens to be used in the grammar
  * @module nearley/tokens
  */
-const stateStart = require('./state-start'),
-    stateComment = require('./state-comment');
+const _ = require('lodash');
 
-function registerTokens(tokens) {
-    // XXX: until nearley supports `.` in token identifiers this will
-    //      pollute the global scope :(
-    const g = global || window
-
-    for (const key in tokens) {
-        let value = tokens[key]
-
+const registerTokens = (tokens) => {
+    _.each(tokens, (value, key) => {
         if (value instanceof String)
             value = [value]
 
@@ -20,19 +13,19 @@ function registerTokens(tokens) {
             // we've got ourselves a keyword array!
             const keywords = value instanceof Array ? value : value.value
 
-            for (let keyword of keywords) {
+            _.each(keywords, (keyword) => {
                 // add tester functions for each
-                g[key + '_' + keyword] = {
+                global[key + '_' + keyword] = {
                     test: tok =>
                         tok.type === key && tok.value === keyword
                 }
-            }
+            });
         }
 
         // add tester function for `key`
-        g[key] = { test: tok => tok.type === key }
-    }
+        global[key] = { test: tok => tok.type === key }
+    });
 }
 
-registerTokens(stateStart);
-registerTokens(stateComment);
+registerTokens(require('./state-start'));
+registerTokens(require('./state-comment'));
