@@ -9,8 +9,6 @@ require('./tokens');
 require('../ast');
 
 %}
- 
-@builtin "whitespace.ne"
 
 Block -> 
 	Statement
@@ -38,9 +36,8 @@ ChildrenInstantiation ->
 	| ModuleInstantiation
 
 SingleModuleInstantiation ->
-	%identifier %lparent %rparent  {% d => new ActionNode(d[0], d[0].value) %}
+	%identifier %lparent %rparent  {% d => new ActionNode(d[0], d[0].value) %} 
 	| %identifier %lparent Arguments %rparent  {% d => new ActionNode(d[0], d[0].value, d[4]) %}
-	| %identifier %seperator SingleModuleInstantiation {% d => d[3].setLabel(d[0].value) %}
 
 
 Expression -> 

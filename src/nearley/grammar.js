@@ -14,13 +14,6 @@ require('../ast');
 
 var grammar = {
     ParserRules: [
-    {"name": "_$ebnf$1", "symbols": []},
-    {"name": "_$ebnf$1", "symbols": ["_$ebnf$1", "wschar"], "postprocess": function arrpush(d) {return d[0].concat([d[1]]);}},
-    {"name": "_", "symbols": ["_$ebnf$1"], "postprocess": function(d) {return null;}},
-    {"name": "__$ebnf$1", "symbols": ["wschar"]},
-    {"name": "__$ebnf$1", "symbols": ["__$ebnf$1", "wschar"], "postprocess": function arrpush(d) {return d[0].concat([d[1]]);}},
-    {"name": "__", "symbols": ["__$ebnf$1"], "postprocess": function(d) {return null;}},
-    {"name": "wschar", "symbols": [/[ \t\n\v\f]/], "postprocess": id},
     {"name": "Block", "symbols": ["Statement"]},
     {"name": "Block", "symbols": ["Block", "Statement"], "postprocess": d => _.concat(d[0], d[1])},
     {"name": "Statement", "symbols": [comment], "postprocess": d => new CommentNode(d[0], d[0].value)},
@@ -42,7 +35,6 @@ var grammar = {
     {"name": "ChildrenInstantiation", "symbols": ["ModuleInstantiation"]},
     {"name": "SingleModuleInstantiation", "symbols": [identifier, lparent, rparent], "postprocess": d => new ActionNode(d[0], d[0].value)},
     {"name": "SingleModuleInstantiation", "symbols": [identifier, lparent, "Arguments", rparent], "postprocess": d => new ActionNode(d[0], d[0].value, d[4])},
-    {"name": "SingleModuleInstantiation", "symbols": [identifier, seperator, "SingleModuleInstantiation"], "postprocess": d => d[3].setLabel(d[0].value)},
     {"name": "Expression", "symbols": [keyword_true], "postprocess": d => new BooleanValue(d[0], true)},
     {"name": "Expression", "symbols": [keyword_false], "postprocess": d => new BooleanValue(d[0], false)},
     {"name": "Expression", "symbols": [identifier], "postprocess": d => new ReferenceValue(d[0], d[0].value)},
