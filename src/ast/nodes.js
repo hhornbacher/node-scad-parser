@@ -83,13 +83,9 @@ function Nodes(registerClass) {
             }
             else if (_.isArray(children)) {
                 if (children.length > 0)
-                    return '\n' + _.map(children, child => {
-                        if (child === null)
-                            return '(null)\n' + indent;
-                        if (_.isNumber(child))
-                            return child + '\n' + indent;
-                        return child.toString({ indent: indentCount + 1 }) + '\n';
-                    }).join('') + indent;
+                    return '\n'
+                        + _.map(children, child => child.toString({ indent: indentCount + 1 }) + '\n').join('')
+                        + indent;
                 return '';
             }
 
@@ -336,19 +332,6 @@ function Nodes(registerClass) {
         }
 
         /**
-         * Set a label
-         * 
-         * @param {string} label 
-         * @returns {ActionNode} this
-         * 
-         * @memberOf ActionNode
-         */
-        setLabel(label) {
-            this.label = label;
-            return this;
-        }
-
-        /**
          * Get string representation of this node
          * 
          * @param {Object} [options={ indent: 0 }] 
@@ -358,8 +341,6 @@ function Nodes(registerClass) {
             let params = {
                 name: this.name,
             };
-            if (this.label !== null)
-                params.label = this.label;
             if (this.modifier !== null)
                 params.modifier = this.modifier;
             if (this.params !== null && this.params.length > 0)

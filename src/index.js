@@ -57,19 +57,22 @@ class SCADParser {
 
       // Check if last token is a LexerError
       if (last.type === 'LexerError') {
-        error = new Error(`Lexer error:\n${last.value}`);
+        let location = new Location(last);
+        let excerpt = this.getCodeExcerpt(file, location);
+        error = new Error(`Lexer error:\n${last.value} ${location.toString()}\nExcerpt:\n\n${excerpt}`);
         // Add the location to the error
-        //error.location = _.pick(last, ['offset', 'size', 'lineBreaks', 'line', 'col']);
-        error.location = new Location(last);
+        error.location = location;
       }
       else {
-        error = new Error(`Parser error: Unexpected ${last.type} '${last.value}'`);
+        let location = new Location(last);
+        let excerpt = this.getCodeExcerpt(file, location);
+        error = new Error(`Parser error: Unexpected ${last.type} '${last.value}' ${location.toString()}\nExcerpt:\n\n${excerpt}`);
         // Add the last 3 tokens to the error
         error.lastTokens = tokens.slice(tokens.length - 3, tokens.length);
         // Add the location to the error
-        error.location = new Location(last);
+        error.location = location;
         // Add the code excerpt to the error
-        error.excerpt = this.getCodeExcerpt(file, error.location);
+        error.excerpt = excerpt;
       }
       throw error;
     }
@@ -117,8 +120,27 @@ class SCADParser {
    */
   getCodeExcerpt(file, location, lines = 3) {
     let code = this.codeCache[file].split('\n');
-    code = code.slice(location.line - (lines + 2), location.line + (lines - 1));
-    return code.join('\n');
+
+    const start = location.line - (lines + 2);
+    const end = location.line + (lines - 1);
+    code = code.slice(start, location.line + (lines - 1));
+
+    function pad(n, width, z) {
+      z = z || '0';
+      n = n + '';
+      return n.length >= width ? n : new Array(width - n.length + 1).join(z) + n;
+    }
+    function drawMarker(indent) {
+      return _.times(indent, () => ' ').join('') + _.times(location.column + 1, () => ' ').join('')
+        + '^' + _.times(location.size - 2, () => '-').join('') + '^';
+    }
+
+    return _.map(code, (line, index) => {
+      if (index != (lines + 1))
+        return `${pad(index + start + 1, end.toString().length)}: ${line}`;
+      else
+        return `${pad(index + start + 1, end.toString().length)}: ${line}\n${drawMarker(end.toString().length)}`;
+    }).join('\n');
   }
 }
 
