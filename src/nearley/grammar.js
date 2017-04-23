@@ -9,7 +9,7 @@ function id(x) {return x[0]; }
  * @module nearley/grammar
  */
 
-require('./tokens');
+require('./tokens')();
 require('../ast');
 
 const pickTokens = (match) => _.filter(match, token => {

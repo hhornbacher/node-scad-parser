@@ -3,11 +3,10 @@ const _ = require('lodash'),
   moo = require('moo'),
   nearley = require("nearley"),
   grammar = require("./nearley/grammar"),
-  stateStart = require("./nearley/state-start"),
-  stateComment = require("./nearley/state-comment"),
+  tokens = require("./nearley/tokens").tokens,
   inspect = require('util').inspect;
 
-const lexer = moo.states({ start: stateStart, comment: stateComment });
+const lexer = moo.compile(tokens);
 
 /**
  * Parser for OpenSCAD code
@@ -154,9 +153,6 @@ if (!module.parent) {
   try {
     let index = process.argv[2] || 1;
     const ast = parser.parseAST('../examples/ex' + index + '.scad');
-    _.each(ast.children, child => {
-      console.log(child.tokens);
-    });
     console.log(ast.toString());
     console.log('done');
   } catch (error) {
