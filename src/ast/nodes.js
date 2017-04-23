@@ -267,7 +267,7 @@ function Nodes(registerClass) {
      * @param {any} block 
      */
     class ModuleNode extends Node {
-        constructor(tokens, name, params, block) {
+        constructor(tokens, name, params = null, block = []) {
             super(block, tokens);
             this.name = name;
             this.params = params;
@@ -327,7 +327,7 @@ function Nodes(registerClass) {
         constructor(tokens, name, params = []) {
             super(null, tokens);
             this.name = name.replace(/([!#\*\%]?)(.*)/, '$2');
-            this.modifier = name.replace(/([!#\*\%]?)(.*)/, '$1');
+            this.modifier = name.replace(/([!#\*\%]?)(.*)/, '$1') || null;
             this.params = params;
         }
 
@@ -407,13 +407,13 @@ function Nodes(registerClass) {
      * @param {boolean} [negative=false] 
      */
     class ExpressionNode extends Node {
-        constructor(tokens, leftExpression, rightExpression = null, operator = null, negative = false) {
+        constructor(tokens, leftExpression, rightExpression = null, operator = null) {
             super(null, tokens);
 
             this.leftExpression = leftExpression;
             this.rightExpression = rightExpression;
             this.operator = operator;
-            this.negative = negative;
+            this.negative = false;
 
             if (leftExpression.constructor.name === 'ExpressionNode') {
                 leftExpression.parent = this;

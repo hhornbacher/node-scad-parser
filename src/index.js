@@ -66,9 +66,11 @@ class SCADParser {
       else {
         let location = new Location(last);
         let excerpt = this.getCodeExcerpt(file, location);
-        error = new Error(`Parser error: Unexpected ${last.type} '${last.value}' ${location.toString()}\nExcerpt:\n\n${excerpt}`);
+        let lastTokens = tokens.slice(tokens.length - 3, tokens.length);
+        error = new Error(
+          `Parser error: Unexpected token '${last.value}' (Type: ${last.type}, ${location.toString()})\nLast tokens: ["${lastTokens.join('", "')}"]\nExcerpt:\n\n${excerpt}`);
         // Add the last 3 tokens to the error
-        error.lastTokens = tokens.slice(tokens.length - 3, tokens.length);
+        error.lastTokens = lastTokens;
         // Add the location to the error
         error.location = location;
         // Add the code excerpt to the error
