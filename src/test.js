@@ -80,12 +80,12 @@ describe('SCADParser', function () {
   });
   it('should parse example 2', function () {
     const root = parser.parseAST('./examples/ex2.scad');
-    expect(root.children.length).to.equal(22);
+    expect(root.children.length).to.equal(26);
     expect(root.toString()).to.contain('Root');
   });
   it('should parse example 3', function () {
     const root = parser.parseAST('./examples/ex3.scad');
-    expect(root.children.length).to.equal(44);
+    expect(root.children.length).to.equal(29);
     expect(root.toString()).to.contain('Root');
   });
   it('should parse example 4', function () {

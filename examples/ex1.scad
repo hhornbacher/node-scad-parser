@@ -23,11 +23,12 @@ yy=[1:2];
 
 color("red");
 
+xxxx=-(4+2);
 i= 5 == 3;
 
 color("black") translate() {
     XXX=10;
-    cube([1,2.3,0],"c",d=3);
+    #cube([1,2.3,0],"c",d=3);
 }
 
 
