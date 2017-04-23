@@ -4,6 +4,10 @@
  */
 const _ = require('lodash');
 
+/**
+ * Register token definitions globally for use in the grammar definition
+ * @param {Object} tokens Token difinitions 
+ */
 const registerTokens = (tokens) => {
     _.each(tokens, (value, key) => {
         if (value instanceof String)
