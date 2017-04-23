@@ -8,6 +8,12 @@
 require('./tokens');
 require('../ast');
 
+const pickTokens = (match) => _.filter(match, token => {
+	if(token.constructor.name === 'Object')
+		return true;
+	return false;
+});
+
 %}
 
 Block -> 
@@ -16,14 +22,14 @@ Block ->
 
 
 Statement -> 
-	%comment {% d => new CommentNode(d[0], d[0].value) %}
-	| %lcomment %icomment %rcomment {% d => new CommentNode(d[0], d[1].value, true) %}
-	| %include %eos {% d => new IncludeNode(d[0], d[0].value) %}
-	| %use %eos {% d => new UseNode(d[0], d[0].value) %}
-	| %keyword_module %identifier %lparent Parameters:? %rparent {% d => new ModuleNode(d[0], d[1].value, d[3]/*, d[10]*/) %}
-	| %keyword_function %identifier %lparent Parameters:? %rparent %assign Expression %eos {% d => new FunctionNode(d[0], d[2].value/*, d[6], d[12]*/) %}
+	%comment {% d => new CommentNode(pickTokens(d), d[0].value) %}
+	| %lcomment %icomment %rcomment {% d => new CommentNode(pickTokens(d), d[1].value, true) %}
+	| %include %eos {% d => new IncludeNode(pickTokens(d), d[0].value) %}
+	| %use %eos {% d => new UseNode(pickTokens(d), d[0].value) %}
+	| %keyword_module %identifier %lparent Parameters:? %rparent {% d => new ModuleNode(pickTokens(d), d[1].value, d[3]/*, d[10]*/) %}
+	| %keyword_function %identifier %lparent Parameters:? %rparent %assign Expression %eos {% d => new FunctionNode(pickTokens(d), d[1].value, d[3], d[6]) %}
 	| %lblock Block %rblock {% d => d[1] %}
-	| %identifier %assign Expression %eos {% d => new VariableNode(d[0], d[0].value, d[2]) %}
+	| %identifier %assign Expression %eos {% d => new VariableNode(pickTokens(d), d[0].value, d[2]) %}
 	| ModuleInstantiation {% id %}
 
 
@@ -36,24 +42,24 @@ ChildrenInstantiation ->
 	| ModuleInstantiation
 
 SingleModuleInstantiation ->
-	%identifier %lparent %rparent  {% d => new ActionNode(d[0], d[0].value) %} 
-	| %identifier %lparent Arguments %rparent  {% d => new ActionNode(d[0], d[0].value, d[4]) %}
+	%identifier %lparent %rparent  {% d => new ActionNode(pickTokens(d), d[0].value) %} 
+	| %identifier %lparent Arguments %rparent  {% d => new ActionNode(pickTokens(d), d[0].value, d[4]) %}
 
 
 Expression -> 
-	%keyword_true {% d => new BooleanValue(d[0], true) %}
-	| %keyword_false {% d => new BooleanValue(d[0], false) %}
-	| %identifier {% d => new ReferenceValue(d[0], d[0].value) %}
+	%keyword_true {% d => new BooleanValue(pickTokens(d), true) %}
+	| %keyword_false {% d => new BooleanValue(pickTokens(d), false) %}
+	| %identifier {% d => new ReferenceValue(pickTokens(d), d[0].value) %}
 	#| Expression "." %identifier
-	| %float {% d => new NumberValue(d[0], d[0].value) %}
-	| %string {% d => new StringValue(d[0], d[0].value) %}
-	| %lparent Expression %rparent {% d => new ExpressionNode(d[1]) %}
-	| %lvect Expression %seperator Expression %rvect {% d => new RangeValue(d[0], d[1], d[3]) %}
-	| %lvect Expression %seperator Expression %seperator Expression %rvect {% d => new RangeValue(d[0], d[1], d[5], d[3]) %}
-	| %lvect VectorExpression %rvect {% d => new VectorValue(d[0], d[1]) %}
-	| Expression %operator1 Expression {% d => new ExpressionNode(d[0], d[2], d[1]) %}
-	| Expression %operator2 Expression {% d => new ExpressionNode(d[0], d[2], d[1]) %}
-	| Expression %operator3 Expression {% d => new ExpressionNode(d[0], d[2], d[1]) %}
+	| %float {% d => new NumberValue(pickTokens(d), d[0].value) %}
+	| %string {% d => new StringValue(pickTokens(d), d[0].value) %}
+	| %lparent Expression %rparent {% d => new ExpressionNode(pickTokens(d), d[1]) %}
+	| %lvect Expression %seperator Expression %rvect {% d => new RangeValue(pickTokens(d), d[1], d[3]) %}
+	| %lvect Expression %seperator Expression %seperator Expression %rvect {% d => new RangeValue(pickTokens(d), d[1], d[5], d[3]) %}
+	| %lvect VectorExpression %rvect {% d => new VectorValue(pickTokens(d), d[1]) %}
+	| Expression %operator1 Expression {% d => new ExpressionNode(pickTokens(d), d[2], d[1]) %}
+	| Expression %operator2 Expression {% d => new ExpressionNode(pickTokens(d), d[2], d[1]) %}
+	| Expression %operator3 Expression {% d => new ExpressionNode(pickTokens(d), d[2], d[1]) %}
 	| %operator2 Expression {% d => {
 		if(_.isNumber(d[1]) && d[0].value === '-')
 			return -d[1];

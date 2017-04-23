@@ -152,6 +152,9 @@ if (!module.parent) {
   try {
     let index = process.argv[2] || 1;
     const ast = parser.parseAST('../examples/ex' + index + '.scad');
+    _.each(ast.children, child => {
+      console.log(child.tokens);
+    });
     console.log(ast.toString());
     console.log('done');
   } catch (error) {

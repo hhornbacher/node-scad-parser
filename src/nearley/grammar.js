@@ -12,41 +12,47 @@ function id(x) {return x[0]; }
 require('./tokens');
 require('../ast');
 
+const pickTokens = (match) => _.filter(match, token => {
+	if(token.constructor.name === 'Object')
+		return true;
+	return false;
+});
+
 var grammar = {
     ParserRules: [
     {"name": "Block", "symbols": ["Statement"]},
     {"name": "Block", "symbols": ["Block", "Statement"], "postprocess": d => _.concat(d[0], d[1])},
-    {"name": "Statement", "symbols": [comment], "postprocess": d => new CommentNode(d[0], d[0].value)},
-    {"name": "Statement", "symbols": [lcomment, icomment, rcomment], "postprocess": d => new CommentNode(d[0], d[1].value, true)},
-    {"name": "Statement", "symbols": [include, eos], "postprocess": d => new IncludeNode(d[0], d[0].value)},
-    {"name": "Statement", "symbols": [use, eos], "postprocess": d => new UseNode(d[0], d[0].value)},
+    {"name": "Statement", "symbols": [comment], "postprocess": d => new CommentNode(pickTokens(d), d[0].value)},
+    {"name": "Statement", "symbols": [lcomment, icomment, rcomment], "postprocess": d => new CommentNode(pickTokens(d), d[1].value, true)},
+    {"name": "Statement", "symbols": [include, eos], "postprocess": d => new IncludeNode(pickTokens(d), d[0].value)},
+    {"name": "Statement", "symbols": [use, eos], "postprocess": d => new UseNode(pickTokens(d), d[0].value)},
     {"name": "Statement$ebnf$1", "symbols": ["Parameters"], "postprocess": id},
     {"name": "Statement$ebnf$1", "symbols": [], "postprocess": function(d) {return null;}},
-    {"name": "Statement", "symbols": [keyword_module, identifier, lparent, "Statement$ebnf$1", rparent], "postprocess": d => new ModuleNode(d[0], d[1].value, d[3]/*, d[10]*/)},
+    {"name": "Statement", "symbols": [keyword_module, identifier, lparent, "Statement$ebnf$1", rparent], "postprocess": d => new ModuleNode(pickTokens(d), d[1].value, d[3]/*, d[10]*/)},
     {"name": "Statement$ebnf$2", "symbols": ["Parameters"], "postprocess": id},
     {"name": "Statement$ebnf$2", "symbols": [], "postprocess": function(d) {return null;}},
-    {"name": "Statement", "symbols": [keyword_function, identifier, lparent, "Statement$ebnf$2", rparent, assign, "Expression", eos], "postprocess": d => new FunctionNode(d[0], d[2].value/*, d[6], d[12]*/)},
+    {"name": "Statement", "symbols": [keyword_function, identifier, lparent, "Statement$ebnf$2", rparent, assign, "Expression", eos], "postprocess": d => new FunctionNode(pickTokens(d), d[1].value, d[3], d[6])},
     {"name": "Statement", "symbols": [lblock, "Block", rblock], "postprocess": d => d[1]},
-    {"name": "Statement", "symbols": [identifier, assign, "Expression", eos], "postprocess": d => new VariableNode(d[0], d[0].value, d[2])},
+    {"name": "Statement", "symbols": [identifier, assign, "Expression", eos], "postprocess": d => new VariableNode(pickTokens(d), d[0].value, d[2])},
     {"name": "Statement", "symbols": ["ModuleInstantiation"], "postprocess": id},
     {"name": "ModuleInstantiation", "symbols": ["SingleModuleInstantiation", "ChildrenInstantiation"], "postprocess": d => d[0].setChildren(d[1])},
     {"name": "ModuleInstantiation", "symbols": ["SingleModuleInstantiation", eos], "postprocess": id},
     {"name": "ChildrenInstantiation", "symbols": [lblock, "Block", rblock], "postprocess": d => d[1]},
     {"name": "ChildrenInstantiation", "symbols": ["ModuleInstantiation"]},
-    {"name": "SingleModuleInstantiation", "symbols": [identifier, lparent, rparent], "postprocess": d => new ActionNode(d[0], d[0].value)},
-    {"name": "SingleModuleInstantiation", "symbols": [identifier, lparent, "Arguments", rparent], "postprocess": d => new ActionNode(d[0], d[0].value, d[4])},
-    {"name": "Expression", "symbols": [keyword_true], "postprocess": d => new BooleanValue(d[0], true)},
-    {"name": "Expression", "symbols": [keyword_false], "postprocess": d => new BooleanValue(d[0], false)},
-    {"name": "Expression", "symbols": [identifier], "postprocess": d => new ReferenceValue(d[0], d[0].value)},
-    {"name": "Expression", "symbols": [float], "postprocess": d => new NumberValue(d[0], d[0].value)},
-    {"name": "Expression", "symbols": [string], "postprocess": d => new StringValue(d[0], d[0].value)},
-    {"name": "Expression", "symbols": [lparent, "Expression", rparent], "postprocess": d => new ExpressionNode(d[1])},
-    {"name": "Expression", "symbols": [lvect, "Expression", seperator, "Expression", rvect], "postprocess": d => new RangeValue(d[0], d[1], d[3])},
-    {"name": "Expression", "symbols": [lvect, "Expression", seperator, "Expression", seperator, "Expression", rvect], "postprocess": d => new RangeValue(d[0], d[1], d[5], d[3])},
-    {"name": "Expression", "symbols": [lvect, "VectorExpression", rvect], "postprocess": d => new VectorValue(d[0], d[1])},
-    {"name": "Expression", "symbols": ["Expression", operator1, "Expression"], "postprocess": d => new ExpressionNode(d[0], d[2], d[1])},
-    {"name": "Expression", "symbols": ["Expression", operator2, "Expression"], "postprocess": d => new ExpressionNode(d[0], d[2], d[1])},
-    {"name": "Expression", "symbols": ["Expression", operator3, "Expression"], "postprocess": d => new ExpressionNode(d[0], d[2], d[1])},
+    {"name": "SingleModuleInstantiation", "symbols": [identifier, lparent, rparent], "postprocess": d => new ActionNode(pickTokens(d), d[0].value)},
+    {"name": "SingleModuleInstantiation", "symbols": [identifier, lparent, "Arguments", rparent], "postprocess": d => new ActionNode(pickTokens(d), d[0].value, d[4])},
+    {"name": "Expression", "symbols": [keyword_true], "postprocess": d => new BooleanValue(pickTokens(d), true)},
+    {"name": "Expression", "symbols": [keyword_false], "postprocess": d => new BooleanValue(pickTokens(d), false)},
+    {"name": "Expression", "symbols": [identifier], "postprocess": d => new ReferenceValue(pickTokens(d), d[0].value)},
+    {"name": "Expression", "symbols": [float], "postprocess": d => new NumberValue(pickTokens(d), d[0].value)},
+    {"name": "Expression", "symbols": [string], "postprocess": d => new StringValue(pickTokens(d), d[0].value)},
+    {"name": "Expression", "symbols": [lparent, "Expression", rparent], "postprocess": d => new ExpressionNode(pickTokens(d), d[1])},
+    {"name": "Expression", "symbols": [lvect, "Expression", seperator, "Expression", rvect], "postprocess": d => new RangeValue(pickTokens(d), d[1], d[3])},
+    {"name": "Expression", "symbols": [lvect, "Expression", seperator, "Expression", seperator, "Expression", rvect], "postprocess": d => new RangeValue(pickTokens(d), d[1], d[5], d[3])},
+    {"name": "Expression", "symbols": [lvect, "VectorExpression", rvect], "postprocess": d => new VectorValue(pickTokens(d), d[1])},
+    {"name": "Expression", "symbols": ["Expression", operator1, "Expression"], "postprocess": d => new ExpressionNode(pickTokens(d), d[2], d[1])},
+    {"name": "Expression", "symbols": ["Expression", operator2, "Expression"], "postprocess": d => new ExpressionNode(pickTokens(d), d[2], d[1])},
+    {"name": "Expression", "symbols": ["Expression", operator3, "Expression"], "postprocess": d => new ExpressionNode(pickTokens(d), d[2], d[1])},
     {"name": "Expression", "symbols": [operator2, "Expression"], "postprocess":  d => {
         	if(_.isNumber(d[1]) && d[0].value === '-')
         		return -d[1];

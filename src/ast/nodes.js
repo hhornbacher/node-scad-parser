@@ -13,7 +13,7 @@ function Nodes(registerClass) {
      * 
      * @param {Array.Node} children Children of this node
      * @param {any} [privateProps={}] Private properties of this node
-     * @param {any} token The token of this node
+     * @param {Array.Token} tokens The tokens of this node
      */
     class Node {
         constructor(children, tokens) {
@@ -152,7 +152,7 @@ function Nodes(registerClass) {
      * @class CommentNode
      * @extends {Node}
      * 
-     * @param {any} token 
+     * @param {Array.Token} tokens The tokens of this node
      * @param {any} text 
      * @param {boolean} [multiline=false] 
      */
@@ -185,7 +185,7 @@ function Nodes(registerClass) {
      * @class VariableNode
      * @extends {Node}
      * 
-     * @param {any} token 
+     * @param {Array.Token} tokens The tokens of this node
      * @param {any} name 
      * @param {any} value 
      */
@@ -221,7 +221,7 @@ function Nodes(registerClass) {
      * @class IncludeNode
      * @extends {Node}
      * 
-     * @param {any} token 
+     * @param {Array.Token} tokens The tokens of this node
      * @param {any} file 
      */
     class IncludeNode extends Node {
@@ -261,7 +261,7 @@ function Nodes(registerClass) {
      * @class ModuleNode
      * @extends {Node}
      * 
-     * @param {any} token 
+     * @param {Array.Token} tokens The tokens of this node
      * @param {any} name 
      * @param {any} params 
      * @param {any} block 
@@ -301,7 +301,7 @@ function Nodes(registerClass) {
      * @class ForLoopNode
      * @extends {Node}
      * 
-     * @param {any} token 
+     * @param {Array.Token} tokens The tokens of this node
      * @param {any} params 
      * @param {any} block 
      */
@@ -319,7 +319,7 @@ function Nodes(registerClass) {
      * @class ActionNode
      * @extends {Node}
      * 
-     * @param {any} token 
+     * @param {Array.Token} tokens The tokens of this node
      * @param {any} name 
      * @param {any} [params=[]] 
      */
@@ -360,7 +360,7 @@ function Nodes(registerClass) {
      * @class FunctionNode
      * @extends {Node}
      * 
-     * @param {any} token 
+     * @param {Array.Token} tokens The tokens of this node
      * @param {any} name 
      * @param {any} params 
      * @param {any} expression 
@@ -400,14 +400,15 @@ function Nodes(registerClass) {
      * @class ExpressionNode
      * @extends {Node}
      * 
+     * @param {Array.Token} tokens The tokens of this node
      * @param {any} leftExpression 
      * @param {any} [rightExpression=null] 
      * @param {any} [operator=null] 
      * @param {boolean} [negative=false] 
      */
     class ExpressionNode extends Node {
-        constructor(leftExpression, rightExpression = null, operator = null, negative = false) {
-            super(null, null);
+        constructor(tokens, leftExpression, rightExpression = null, operator = null, negative = false) {
+            super(null, tokens);
 
             this.leftExpression = leftExpression;
             this.rightExpression = rightExpression;

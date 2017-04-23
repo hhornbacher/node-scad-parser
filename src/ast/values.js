@@ -12,13 +12,13 @@ function Values(registerClass) {
      * @class NumberValue
      * @extends {Number}
      * 
-     * @param {Token} token The lexed token from moo
+     * @param {Array.Token} tokens The lexed tokens from moo
      * @param {number} value The value
      */
     class NumberValue extends Number {
-        constructor(token, value) {
+        constructor(tokens, value) {
             super(parseFloat(value));
-            this.location = new Location(token);
+            this.tokens = tokens;
         }
     }
     registerClass(NumberValue);
@@ -29,13 +29,13 @@ function Values(registerClass) {
      * @class BooleanValue
      * @extends {Boolean}
      * 
-     * @param {Token} token The lexed token from moo
+     * @param {Array.Token} tokens The lexed tokens from moo
      * @param {boolean} value The value
      */
     class BooleanValue extends Boolean {
-        constructor(token, value) {
+        constructor(tokens, value) {
             super(value);
-            this.location = new Location(token);
+            this.tokens = tokens;
         }
     }
     registerClass(BooleanValue);
@@ -46,13 +46,13 @@ function Values(registerClass) {
      * @class StringValue
      * @extends {String}
      * 
-     * @param {Token} token The lexed token from moo
+     * @param {Array.Token} tokens The lexed tokens from moo
      * @param {string} value The value
      */
     class StringValue extends String {
-        constructor(token, value) {
+        constructor(tokens, value) {
             super(value);
-            this.location = new Location(token);
+            this.tokens = tokens;
         }
     }
     registerClass(StringValue);
@@ -62,12 +62,12 @@ function Values(registerClass) {
      * 
      * @class VectorValue
      * 
-     * @param {Token} token The lexed token from moo
+     * @param {Array.Token} tokens The lexed tokens from moo
      * @param {array} value The value
      */
     class VectorValue {
-        constructor(token, value) {
-            this.location = new Location(token);
+        constructor(tokens, value) {
+            this.tokens = tokens;
             this.value = value;
         }
 
@@ -87,14 +87,14 @@ function Values(registerClass) {
      * 
      * @class RangeValue
      * 
-     * @param {Token} token The lexed token from moo
+     * @param {Array.Token} tokens The lexed tokens from moo
      * @param {NumberValue} start Start of the range
      * @param {NumberValue} end End of the range
      * @param {NumberValue} [increment=new NumberValue(1)] Increment step size (default: `0`)
      */
     class RangeValue {
-        constructor(token, start, end, increment = new NumberValue(1)) {
-            this.location = new Location(token);
+        constructor(tokens, start, end, increment = new NumberValue(null, 1)) {
+            this.tokens = tokens;
             this.start = start;
             this.end = end;
             this.increment = increment;
@@ -116,13 +116,13 @@ function Values(registerClass) {
      * 
      * @class ReferenceValue
      * 
-     * @param {Token} token The lexed token from moo
+     * @param {Array.Token} tokens The lexed tokens from moo
      * @param {any} reference The referenced identifier
      * @param {boolean} [negative=false] Negativity flag
      */
     class ReferenceValue {
-        constructor(token, reference, negative = false) {
-            this.location = new Location(token);
+        constructor(tokens, reference, negative = false) {
+            this.tokens = tokens;
             this.negative = negative;
             this.reference = reference;
         }
