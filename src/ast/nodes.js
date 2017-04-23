@@ -16,7 +16,7 @@ function Nodes(registerClass) {
      * @param {any} token The token of this node
      */
     class Node {
-        constructor(children, token) {
+        constructor(children, tokens) {
             if (_.isArray(children)) {
                 children = _.filter(children, x => !!x);
                 _.each(children, (child) => {
@@ -27,7 +27,7 @@ function Nodes(registerClass) {
             else
                 this.children = [];
 
-            this.location = token ? new Location(token) : null;
+            this.tokens = tokens;
         }
 
         /**
@@ -157,8 +157,8 @@ function Nodes(registerClass) {
      * @param {boolean} [multiline=false] 
      */
     class CommentNode extends Node {
-        constructor(token, text, multiline = false) {
-            super(null, token);
+        constructor(tokens, text, multiline = false) {
+            super(null, tokens);
             this.text = multiline ? text : text.trim();
             this.multiline = multiline;
         }
@@ -190,8 +190,8 @@ function Nodes(registerClass) {
      * @param {any} value 
      */
     class VariableNode extends Node {
-        constructor(token, name, value) {
-            super(null, token);
+        constructor(tokens, name, value) {
+            super(null, tokens);
             this.name = name;
             this.value = value;
         }
@@ -225,8 +225,8 @@ function Nodes(registerClass) {
      * @param {any} file 
      */
     class IncludeNode extends Node {
-        constructor(token, file) {
-            super(null, token);
+        constructor(tokens, file) {
+            super(null, tokens);
             this.file = file;
         }
 
@@ -267,8 +267,8 @@ function Nodes(registerClass) {
      * @param {any} block 
      */
     class ModuleNode extends Node {
-        constructor(token, name, params, block) {
-            super(block, token);
+        constructor(tokens, name, params, block) {
+            super(block, tokens);
             this.name = name;
             this.params = params;
         }
@@ -306,8 +306,8 @@ function Nodes(registerClass) {
      * @param {any} block 
      */
     class ForLoopNode extends Node {
-        constructor(token, params, block) {
-            super(block, token);
+        constructor(tokens, params, block) {
+            super(block, tokens);
             this.params = params;
         }
     }
@@ -324,8 +324,8 @@ function Nodes(registerClass) {
      * @param {any} [params=[]] 
      */
     class ActionNode extends Node {
-        constructor(token, name, params = []) {
-            super(null, token);
+        constructor(tokens, name, params = []) {
+            super(null, tokens);
             this.name = name.replace(/([!#\*\%]?)(.*)/, '$2');
             this.modifier = name.replace(/([!#\*\%]?)(.*)/, '$1');
             this.params = params;
@@ -366,8 +366,8 @@ function Nodes(registerClass) {
      * @param {any} expression 
      */
     class FunctionNode extends Node {
-        constructor(token, name, params, expression) {
-            super(null, token);
+        constructor(tokens, name, params, expression) {
+            super(null, tokens);
             this.name = name;
             this.params = params;
             this.expression = expression;
