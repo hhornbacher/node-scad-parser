@@ -17,6 +17,7 @@ class SCADParser {
     this.results = null;
     this.cache = [];
     this.codeCache = [];
+    this.tokenCache = [];
   }
 
   /**
@@ -29,7 +30,7 @@ class SCADParser {
    * @memberOf SCADParser
    */
   parse(code, file) {
-    let tokens = [];
+    this.tokenCache[file] = [];
     try {
       const parser = new nearley.Parser(grammar.ParserRules, grammar.ParserStart);
       let token;
@@ -44,7 +45,7 @@ class SCADParser {
           continue;
 
         // Capture token
-        tokens.push(token);
+        this.tokenCache[file].push(token);
 
         // Feed the token to the parser
         parser.feed([token]);
@@ -52,7 +53,7 @@ class SCADParser {
       return new RootNode(parser.results[0]);
     } catch (error) {
       // Get last lexed token
-      const last = tokens[tokens.length - 1];
+      const last = this.tokenCache[file][this.tokenCache[file].length - 1];
 
       // Check if last token is a LexerError
       if (last.type === 'LexerError') {
@@ -65,7 +66,7 @@ class SCADParser {
       else {
         let location = new Location(last);
         let excerpt = this.getCodeExcerpt(file, location);
-        let lastTokens = tokens.slice(tokens.length - 3, tokens.length);
+        let lastTokens = this.tokenCache[file].slice(this.tokenCache[file].length - 3, this.tokenCache[file].length);
         error = new Error(
           `Parser error: Unexpected token '${last.value}' (Type: ${last.type}, ${location.toString()})\nLast tokens: ["${lastTokens.join('", "')}"]\nExcerpt:\n\n${excerpt}`);
         // Add the last 3 tokens to the error
@@ -107,6 +108,25 @@ class SCADParser {
     }
 
     return this.cache[file];
+  }
+
+  getToken(position, file) {
+
+    function within(token) {
+      if (position.line == token.line) {
+        if (position.character >= token.col && position.character < (token.col + token.size))
+          return true;
+      }
+      return false;
+    }
+    let out = null;
+    _.each(this.tokenCache[file], token => {
+      if (within(token)) {
+        out = token;
+        return false;
+      }
+    });
+    return out;
   }
 
   /**
@@ -153,6 +173,14 @@ if (!module.parent) {
   try {
     let index = process.argv[2] || 1;
     const ast = parser.parseAST('../examples/ex' + index + '.scad');
+    console.log(parser.getToken({
+      character: 7,
+      line: 14
+    }, '../examples/ex' + index + '.scad'));
+    console.log(ast.findByToken(parser.getToken({
+      character: 7,
+      line: 14
+    }, '../examples/ex' + index + '.scad')).toString());
     console.log(ast.toString());
     console.log('done');
   } catch (error) {

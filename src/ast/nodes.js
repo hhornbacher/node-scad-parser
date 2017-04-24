@@ -41,6 +41,28 @@ function Nodes(registerClass) {
         }
 
         /**
+         * Find a node by it's token
+         * 
+         * @param {Token} token Lexed token within a code file
+         * @returns [Node} If found, else `null`
+         */
+        findByToken(token) {
+            let node = null;
+/*            console.log(token);
+            console.log(_.map(this.children, c => c.tokens || c.name));*/
+            _.each(this.children, child => {
+                if (_.find(child.tokens, token)) {
+                    node = child;
+                    return false;
+                }
+                node = child.findByToken(token);
+                if (node)
+                    return false;
+            });
+            return node;
+        }
+
+        /**
          * Set the children of this node
          * 
          * @param {Array.Node} children Children of this node
