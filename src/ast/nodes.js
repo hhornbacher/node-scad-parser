@@ -67,10 +67,8 @@ function Nodes(registerClass) {
          * @returns 
          */
         findByType(type = 'Root') {
-            let nodes = [];
+            let nodes = _.find(this.children, child => child.className === type + 'Node') || [];
             _.each(this.children, child => {
-                if (child.className === type + 'Node')
-                    nodes.push(child);
                 nodes = _.concat(nodes, child.findByType(type));
             });
             return nodes;
