@@ -1,6 +1,6 @@
 {
   "name": "scad-parser",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "description": "Module to parse the abstract syntax tree of OpenSCAD files",
   "keywords": [
     "openscad",

@@ -110,18 +110,13 @@ class SCADParser {
     return this.cache[file];
   }
 
-  getToken(position, file) {
-
-    function within(token) {
-      if (position.line == token.line) {
-        if (position.character >= token.col && position.character < (token.col + token.size))
-          return true;
-      }
-      return false;
-    }
+  getToken(column, line, file) {
     let out = null;
     _.each(this.tokenCache[file], token => {
-      if (within(token)) {
+      if (
+        line == token.line &&
+        (column >= token.col && column < (token.col + token.size))
+      ) {
         out = token;
         return false;
       }
