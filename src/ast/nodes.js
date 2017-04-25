@@ -48,8 +48,6 @@ function Nodes(registerClass) {
          */
         findByToken(token) {
             let node = null;
-/*            console.log(token);
-            console.log(_.map(this.children, c => c.tokens || c.name));*/
             _.each(this.children, child => {
                 if (_.find(child.tokens, token)) {
                     node = child;
@@ -60,6 +58,24 @@ function Nodes(registerClass) {
                     return false;
             });
             return node;
+        }
+
+        /**
+         * Find a node by it's type (class name without 'Node')
+         * 
+         * @param {string} [type='Root'] 
+         * @returns 
+         * 
+         * @memberOf Node
+         */
+        findByType(type = 'Root') {
+            let nodes = [];
+            _.each(this.children, child => {
+                if (child.className === type + 'Node')
+                    nodes.push(child);
+                nodes = _.concat(nodes, child.findByType(type));
+            });
+            return nodes;
         }
 
         /**

@@ -1,6 +1,6 @@
 {
   "name": "scad-parser",
-  "version": "1.0.6",
+  "version": "1.0.6-extra",
   "description": "Module to parse the abstract syntax tree of OpenSCAD files",
   "keywords": [
     "openscad",
@@ -25,7 +25,7 @@
     "expect.js": "^0.3.1",
     "istanbul": "^0.4.5",
     "jsdoc": "^3.4.3",
-    "mocha": "^3.2.0"
+    "mocha": "^3.3.0"
   },
   "scripts": {
     "test": "istanbul cover _mocha src/test.js -- --perf-basic-prof",
