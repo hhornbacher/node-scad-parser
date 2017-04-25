@@ -65,8 +65,6 @@ function Nodes(registerClass) {
          * 
          * @param {string} [type='Root'] 
          * @returns 
-         * 
-         * @memberOf Node
          */
         findByType(type = 'Root') {
             let nodes = [];
@@ -74,6 +72,41 @@ function Nodes(registerClass) {
                 if (child.className === type + 'Node')
                     nodes.push(child);
                 nodes = _.concat(nodes, child.findByType(type));
+            });
+            return nodes;
+        }
+
+        /**
+         * Find a node by it's name (variables,modules,functions,actions)
+         * 
+         * @param {any} name 
+         * @returns 
+         */
+        findByName(name) {
+            let nodes = [];
+            _.each(this.children, child => {
+                if (child.name === name)
+                    nodes.push(child);
+                nodes = _.concat(nodes, child.findByName(name));
+            });
+            return nodes;
+        }
+
+        /**
+         * Find a node by it's value (looks in values)
+         * @todo Look also deep in expressions!
+         * 
+         * @param {any} value 
+         * @returns 
+         * 
+         * @memberOf Node
+         */
+        findByValue(value) {
+            let nodes = [];
+            _.each(this.children, child => {
+                if (child.value === value)
+                    nodes.push(child);
+                nodes = _.concat(nodes, child.findByValue(name));
             });
             return nodes;
         }
