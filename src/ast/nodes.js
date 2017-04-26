@@ -64,7 +64,7 @@ function Nodes(registerClass) {
          * Find a node by it's type (class name without 'Node')
          * 
          * @param {string} [type='Root'] 
-         * @returns 
+         * @returns {Node}
          */
         findByType(type = 'Root') {
             let nodes = _.find(this.children, child => child.className === type + 'Node') || [];
@@ -78,7 +78,7 @@ function Nodes(registerClass) {
          * Find a node by it's name (variables,modules,functions,actions)
          * 
          * @param {any} name 
-         * @returns 
+         * @returns {Node}
          */
         findByName(name) {
             let nodes = [];
@@ -95,7 +95,7 @@ function Nodes(registerClass) {
          * @todo Look also deep in expressions!
          * 
          * @param {any} value 
-         * @returns 
+         * @returns {Node}
          * 
          * @memberOf Node
          */
