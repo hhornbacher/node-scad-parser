@@ -11,19 +11,14 @@ const _ = require('lodash');
  */
 const registerTokens = (tokens) => {
     _.each(tokens, (value, key) => {
-        if (value instanceof String)
-            value = [value]
-
         if (value instanceof Array || value.value instanceof Array) {
-            // we've got ourselves a keyword array!
-            const keywords = value instanceof Array ? value : value.value
-
+            const keywords = value;
             _.each(keywords, (keyword) => {
                 // add tester functions for each
                 global[key + '_' + keyword] = {
                     test: tok =>
                         tok.type === key && tok.value === keyword
-                }
+                };
             });
         }
 
