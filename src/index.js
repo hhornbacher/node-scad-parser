@@ -56,7 +56,7 @@ class SCADParser {
       const last = this.tokenCache[file][this.tokenCache[file].length - 1];
 
       // Check if last token is a LexerError
-      if (last.type === 'LexerError') {
+      if (last && last.type === 'LexerError') {
         let location = new Location(last);
         let excerpt = this.getCodeExcerpt(file, location);
         error = new Error(`Lexer error:\n${last.value} ${location.toString()}\nExcerpt:\n\n${excerpt}`);
@@ -68,7 +68,7 @@ class SCADParser {
         let excerpt = this.getCodeExcerpt(file, location);
         let lastTokens = this.tokenCache[file].slice(this.tokenCache[file].length - 3, this.tokenCache[file].length);
         error = new Error(
-          `Parser error: Unexpected token '${last.value}' (Type: ${last.type}, ${location.toString()})\nLast tokens: ["${lastTokens.join('", "')}"]\nExcerpt:\n\n${excerpt}`);
+          `Parser error: Unexpected token '${last ? last.value : 'undefined'}' (Type: ${last ? last.type : 'undefined'}, ${location.toString()})\nLast tokens: ["${lastTokens.join('", "')}"]\nExcerpt:\n\n${excerpt}`);
         // Add the last 3 tokens to the error
         error.lastTokens = lastTokens;
         // Add the location to the error
