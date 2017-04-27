@@ -103,7 +103,7 @@ function Nodes(registerClass) {
             let nodes = [];
             _.each(this.children, child => {
                 if (child.value) {
-                    if (child.value.isEqual && child.value.isEqual(value)){
+                    if (child.value.isEqual && child.value.isEqual(value)) {
                         nodes.push(child);
                     }
                 }
@@ -161,9 +161,7 @@ function Nodes(registerClass) {
                 return '';
             }
 
-            if (children)
-                return children.toString();
-            return '(null)';
+            return children.toString();
         }
 
         /**
