@@ -104,7 +104,6 @@ function Nodes(registerClass) {
             _.each(this.children, child => {
                 if (child.value) {
                     if (child.value.isEqual && child.value.isEqual(value)){
-                        console.log(child.value);
                         nodes.push(child);
                     }
                 }
