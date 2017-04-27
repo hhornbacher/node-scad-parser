@@ -137,8 +137,12 @@ class SCADParser {
   getCodeExcerpt(file, location, lines = 3) {
     let code = this.codeCache[file].split('\n');
 
-    const start = location.line - (lines + 2);
-    const end = location.line + (lines - 1);
+    let start = location.line - (lines + 2);
+    if (start < 0)
+      start = 0;
+    let end = location.line + (lines - 1);
+    if (end >= code.length)
+      end = code.length - 1;
     code = code.slice(start, location.line + (lines - 1));
 
     function pad(n, width, z) {
@@ -152,7 +156,7 @@ class SCADParser {
     }
 
     return _.map(code, (line, index) => {
-      if (index != (lines + 1))
+      if (index != location.line-1)
         return `${pad(index + start + 1, end.toString().length)}: ${line}`;
       else
         return `${pad(index + start + 1, end.toString().length)}: ${line}\n${drawMarker(end.toString().length)}`;
