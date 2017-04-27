@@ -62,9 +62,7 @@ Expression ->
 	| Expression %operator2 Expression {% d => new ExpressionNode(pickTokens(d), d[0], d[2], d[1]) %}
 	| Expression %operator3 Expression {% d => new ExpressionNode(pickTokens(d), d[0], d[2], d[1]) %}
 	| %operator2 Expression {% d => {
-		if((_.isNumber(d[1])||!_.isFunction(d[1].setNegative)) && d[0].value === '-')
-			return -d[1];
-		else if(d[0].value === '-')
+		if(d[0].value === '-')
 			return d[1].setNegative(true);
 	} %}
 #	| "!" Expression {% d => !d[2] %}

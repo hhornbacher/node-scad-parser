@@ -51,9 +51,7 @@ var grammar = {
     {"name": "Expression", "symbols": ["Expression", operator2, "Expression"], "postprocess": d => new ExpressionNode(pickTokens(d), d[0], d[2], d[1])},
     {"name": "Expression", "symbols": ["Expression", operator3, "Expression"], "postprocess": d => new ExpressionNode(pickTokens(d), d[0], d[2], d[1])},
     {"name": "Expression", "symbols": [operator2, "Expression"], "postprocess":  d => {
-        	if((_.isNumber(d[1])||!_.isFunction(d[1].setNegative)) && d[0].value === '-')
-        		return -d[1];
-        	else if(d[0].value === '-')
+        	if(d[0].value === '-')
         		return d[1].setNegative(true);
         } },
     {"name": "Parameters", "symbols": ["Parameter"], "postprocess": id},
