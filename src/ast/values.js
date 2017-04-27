@@ -3,22 +3,40 @@
  * @module ast/values
  */
 const _ = require('lodash');
- 
+
 function Values(registerClass) {
 
     /**
      * Number type
      * 
      * @class NumberValue
-     * @extends {Number}
      * 
      * @param {Array.Token} tokens The lexed tokens from moo
      * @param {number} value The value
      */
-    class NumberValue extends Number {
+    class NumberValue {
         constructor(tokens, value) {
-            super(parseFloat(value));
             this.tokens = tokens;
+            this.value = parseFloat(value);
+        }
+
+        setNegative(neg) {
+            if(this.value > 0 && neg)
+                this.value *= -1;
+            return this;
+        }
+
+        isEqual(value) {
+            if (
+                value.constructor.name === 'NumberValue' 
+                && this.value === value.value
+                )
+                return true;
+            return false;
+        }
+
+        toString() {
+            return this.value.toString();
         }
     }
     registerClass(NumberValue);
@@ -27,15 +45,27 @@ function Values(registerClass) {
      * Boolean type
      * 
      * @class BooleanValue
-     * @extends {Boolean}
      * 
      * @param {Array.Token} tokens The lexed tokens from moo
      * @param {boolean} value The value
      */
-    class BooleanValue extends Boolean {
+    class BooleanValue {
         constructor(tokens, value) {
-            super(value);
             this.tokens = tokens;
+            this.value = value;
+        }
+
+        isEqual(value) {
+            if (
+                value.constructor.name === 'BooleanValue'
+                && this.value === value.value
+            )
+                return true;
+            return false;
+        }
+
+        toString() {
+            return this.value.toString();
         }
     }
     registerClass(BooleanValue);
@@ -44,15 +74,27 @@ function Values(registerClass) {
      * String type
      * 
      * @class StringValue
-     * @extends {String}
      * 
      * @param {Array.Token} tokens The lexed tokens from moo
      * @param {string} value The value
      */
-    class StringValue extends String {
+    class StringValue {
         constructor(tokens, value) {
-            super(value);
             this.tokens = tokens;
+            this.value = value;
+        }
+
+        isEqual(value) {
+            if (
+                value.constructor.name === 'StringValue'
+                && this.value === value.value
+            )
+                return true;
+            return false;
+        }
+
+        toString() {
+            return this.value.toString();
         }
     }
     registerClass(StringValue);
@@ -69,6 +111,21 @@ function Values(registerClass) {
         constructor(tokens, value) {
             this.tokens = tokens;
             this.value = value;
+            this.negative=false;
+        }
+
+        setNegative(neg) {
+            this.negative = neg;
+            return this;
+        }
+
+        isEqual(value) {
+            if (
+                value.constructor.name === 'VectorValue'
+                && this.value === value.value
+            )
+                return true;
+            return false;
         }
 
         /**
@@ -100,6 +157,17 @@ function Values(registerClass) {
             this.increment = increment;
         }
 
+        isEqual(value) {
+            if (
+                value.constructor.name === 'RangeValue'
+                && this.start.isEqual(value.start)
+                && this.end.isEqual(value.end)
+                && this.increment.isEqual(value.increment)
+            )
+                return true;
+            return false;
+        }
+
         /**
          * Get the string representation of this object
          * 
@@ -121,10 +189,20 @@ function Values(registerClass) {
      * @param {boolean} [negative=false] Negativity flag
      */
     class ReferenceValue {
-        constructor(tokens, reference, negative = false) {
+        constructor(tokens, reference) {
             this.tokens = tokens;
-            this.negative = negative;
+            this.negative = false;
             this.reference = reference;
+        }
+
+        isEqual(value) {
+            if (
+                value.constructor.name === 'RangeValue'
+                && this.negative === value.negative
+                && this.reference === value.reference
+            )
+                return true;
+            return false;
         }
 
         /**
