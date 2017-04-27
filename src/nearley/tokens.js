@@ -52,7 +52,7 @@ const tokens = {
     operator3: /<|<=|==|!=|>=|>|&&|\|\|/,
     assign: '=',
     identifier: /[A-Za-z_$][A-Za-z0-9_]*/,
-    string: /"[^"]*"/,
+    string: /"([^"]*)"/,
     float: /([0-9]+(?:\.?[0-9]*(?:[eE][-+]?[0-9]+)?)?)/,
     eol: { match: /\n/, lineBreaks: true },
     eos: /[ \t]*;/,
