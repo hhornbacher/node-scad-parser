@@ -5,4 +5,5 @@ instrumentation:
         - .js
     excludes:
         - test.js
+        - cli.js
     embed-source: false
