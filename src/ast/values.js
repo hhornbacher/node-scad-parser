@@ -23,8 +23,6 @@ function Values(registerClass) {
          * 
          * @param {any} value Value to compare with this
          * @returns {boolean}
-         * 
-         * @memberOf BaseValue
          */
         isEqual(value) {
             if (
@@ -41,8 +39,6 @@ function Values(registerClass) {
          * 
          * @param {boolean} neg True if this value is negative
          * @returns {BaseValue} this
-         * 
-         * @memberOf BaseValue
          */
         setNegative(neg) {
             this.negative = neg;
@@ -111,6 +107,12 @@ function Values(registerClass) {
      * @param {array} value The value
      */
     class VectorValue extends BaseValue {
+        /**
+         * Check if values are equal
+         * 
+         * @param {any} value Value to compare with this
+         * @returns {boolean}
+         */
         isEqual(value) {
             let out = false;
             if (value.constructor.name === 'VectorValue') {
@@ -146,6 +148,12 @@ function Values(registerClass) {
             this.increment = increment;
         }
 
+        /**
+         * Check if values are equal
+         * 
+         * @param {any} value Value to compare with this
+         * @returns {boolean}
+         */
         isEqual(value) {
             if (
                 value.constructor.name === 'RangeValue'
@@ -179,6 +187,12 @@ function Values(registerClass) {
             this.reference = reference;
         }
 
+        /**
+         * Check if values are equal
+         * 
+         * @param {any} value Value to compare with this
+         * @returns {boolean}
+         */
         isEqual(value) {
             if (
                 value.constructor.name === 'ReferenceValue'
