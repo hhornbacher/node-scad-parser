@@ -102,9 +102,13 @@ function Nodes(registerClass) {
         findByValue(value) {
             let nodes = [];
             _.each(this.children, child => {
-                if (child.value === value)
-                    nodes.push(child);
-                nodes = _.concat(nodes, child.findByValue(name));
+                if (child.value) {
+                    if (child.value.isEqual && child.value.isEqual(value)){
+                        console.log(child.value);
+                        nodes.push(child);
+                    }
+                }
+                nodes = _.concat(nodes, child.findByValue(value));
             });
             return nodes;
         }

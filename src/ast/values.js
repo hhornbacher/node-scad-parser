@@ -181,7 +181,7 @@ function Values(registerClass) {
 
         isEqual(value) {
             if (
-                value.constructor.name === 'RangeValue'
+                value.constructor.name === 'ReferenceValue'
                 && this.negative === value.negative
                 && this.reference === value.reference
             )
