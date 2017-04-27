@@ -10,6 +10,9 @@ cube([1,2.3,0],"c",d=3);
 
 function add(a,b) = (a+2);
 
+
+function pi() = 3.1415;
+
 module test(d=3) {
     test();
 }
