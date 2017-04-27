@@ -27,7 +27,8 @@ registerClass(_, '_');
  * @param {Token} token The token from which to get the positional information
  */
 class Location {
-    constructor({ offset, size, lineBreaks, line, col }) {
+    constructor(location = { offset:0, size:0, lineBreaks:0, line:1, col:1 }) {
+        let { offset, size, lineBreaks, line, col } = location;
         this.offset = offset;
         this.size = size;
         this.lineBreaks = lineBreaks;
