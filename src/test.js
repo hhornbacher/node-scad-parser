@@ -119,13 +119,18 @@ describe('SCADParser', function () {
     it('should parse example 1', function () {
       const root = parser.parseAST('./examples/ex1.scad');
       expect(root.children.length).to.equal(23);
-      console.log(root.findByValue("Hallo?"));
+      const firstToken = parser.getToken(1, 2, './examples/ex1.scad');
+      expect(firstToken.type).to.be('identifier');
+      expect(firstToken.value).to.be('string');
+      expect(root.findByToken(firstToken).name).to.be('string');
+      expect(root.findByType('Variable').length).to.equal(2);
       expect(root.findByType('Variable').length).to.equal(2);
       expect(root.findByType('Module').length).to.equal(1);
       expect(root.findByType('Function').length).to.equal(1);
       expect(root.findByType('Action').length).to.equal(4);
       expect(root.findByName('test').length).to.equal(2);
       expect(root.findByName('XYZ').length).to.equal(0);
+      expect(root.findByValue(new NumberValue([], '10'))[0].name).to.be('XXX');
       expect(root.toString()).to.contain('Root');
     });
     it('should parse example 2', function () {
