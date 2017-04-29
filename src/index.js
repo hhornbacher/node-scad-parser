@@ -110,6 +110,10 @@ class SCADParser {
     return this.cache[file];
   }
 
+  findTokens(value, file) {
+    return _.find(this.tokenCache[file], token => token.value === value);
+  }
+
   getToken(column, line, file) {
     let out = null;
     _.each(this.tokenCache[file], token => {
@@ -156,7 +160,7 @@ class SCADParser {
     }
 
     return _.map(code, (line, index) => {
-      if (index != location.line-1)
+      if (index != location.line - 1)
         return `${pad(index + start + 1, end.toString().length)}: ${line}`;
       else
         return `${pad(index + start + 1, end.toString().length)}: ${line}\n${drawMarker(end.toString().length)}`;
