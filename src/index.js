@@ -111,7 +111,7 @@ class SCADParser {
   }
 
   findTokens(value, file) {
-    return _.find(this.tokenCache[file], token => token.value === value);
+    return _.filter(this.tokenCache[file], token => token.value === value);
   }
 
   getToken(column, line, file) {
