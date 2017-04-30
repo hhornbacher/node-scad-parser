@@ -1,5 +1,8 @@
 const _ = require('lodash'),
+  Promise = require('bluebird'),
   fs = require('fs'),
+  path = require('path'),
+  childProcess = require('child_process'),
   moo = require('moo'),
   nearley = require("nearley"),
   grammar = require("./nearley/grammar"),
@@ -10,6 +13,9 @@ const lexer = moo.compile(tokens);
 
 /**
  * Parser for OpenSCAD code
+ * 
+ * @class SCADParser
+ * 
  */
 class SCADParser {
   constructor() {
@@ -26,8 +32,6 @@ class SCADParser {
    * @param {string} code Cointains the code to be parsed
    * @param {string} file Name of the parsed file
    * @returns {RootNode} Root node of the code's AST
-   * 
-   * @memberOf SCADParser
    */
   parse(code, file) {
     this.tokenCache[file] = [];
@@ -81,13 +85,52 @@ class SCADParser {
   }
 
   /**
+   * Render the supplied code (with OpenSCAD)
+   * 
+   * @param {string} code Cointains the code to be parsed
+   * @param {string} file Name of the parsed file
+   * @param {object} options Options passed to `nodescad`
+   * @returns {RootNode} Root node of the code's AST
+   */
+  render(code, file, options) {
+    const writeFile = Promise.promisify(fs.writeFile);
+    const exec = Promise.promisify(childProcess.exec);
+
+    const render = (options) => {
+      return exec(
+        options.binaryPath
+        + ' -o ' + options.outputFile
+        + ' --colorscheme=' + options.colorScheme
+        + ' ' + options.inputFile
+      );
+    };
+
+    let _options = _.merge({
+      binaryPath: '/usr/bin/openscad',
+      viewAll: true,
+      autoCenter: true
+    }, options);
+    if (!code && file) {
+      _options.inputFile = file;
+      return render(_options);
+    }
+    else if (code) {
+      let tmpFile = '/tmp/' + (path.basename(file) || 'scad-parser_tmp.scad');
+      return writeFile(tmpFile, 'utf8')
+        .then(() => {
+          _options.inputFile = tmpFile;
+          return render(_options);
+        });
+
+    }
+  }
+
+  /**
    * Parse the abstract syntax tree
    * 
    * @param {string} file Path to the code file
    * @param {string} [code=null] Code of the file to parse (Only supplied, if the file content was read before)
    * @returns {RootNode} Root node of the code's AST
-   * 
-   * @memberOf SCADParser
    */
   parseAST(file, code = null) {
     /*    if (this.cache[file])
@@ -110,12 +153,12 @@ class SCADParser {
     return this.cache[file];
   }
 
-  findTokens(value=null, type=null, file) {
+  findTokens(value = null, type = null, file) {
     let find = {};
-    if(value)
-      find.value=value;
-    if(type)
-      find.type=type;
+    if (value)
+      find.value = value;
+    if (type)
+      find.type = type;
     return _.filter(this.tokenCache[file], find);
   }
 
