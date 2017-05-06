@@ -267,6 +267,21 @@ function Nodes(registerClass) {
         }
 
         /**
+         * Find a node by it's token
+         * 
+         * @param {Token} token Lexed token within a code file
+         * @returns [Node} If found, else `null`
+         */
+        findByToken(token) {
+            let node = null;
+            if (_.isMatch(this.value.token, token) && this.value.className !== 'ExpressionNode')
+                node = this.value;
+            else if (this.value.className === 'ExpressionNode')
+                node = this.value.findByToken(token);
+            return node;
+        }
+
+        /**
          * Get string representation of this node
          * 
          * @param {Object} [options={ indent: 0 }] 
@@ -491,6 +506,33 @@ function Nodes(registerClass) {
             if (rightExpression !== null && rightExpression.constructor.name === 'ExpressionNode') {
                 rightExpression.parent = this;
             }
+        }
+
+        /**
+         * Find a node by it's token
+         * 
+         * @param {Token} token Lexed token within a code file
+         * @returns [Node} If found, else `null`
+         */
+        findByToken(token) {
+            let node = null;
+/*            console.log(this.toString());
+            console.log(this.leftExpression.tokens[0], this.rightExpression ? this.rightExpression.tokens[0] : null);
+            console.log(this.leftExpression.tokens[0], token);
+            console.log(_.isMatch(this.leftExpression.tokens[0], token));*/
+            if (this.rightExpression) {
+                console.log(this.rightExpression.tokens[0], token);
+                console.log(_.isMatch(this.rightExpression.tokens[0], token));
+            }
+            if (_.isMatch(this.leftExpression.tokens[0], token) && this.leftExpression.className !== 'ExpressionNode')
+                node = this.leftExpression;
+            else if (this.leftExpression.className === 'ExpressionNode')
+                node = this.leftExpression.findByToken(token);
+            else if (this.rightExpression && _.isMatch(this.rightExpression.tokens[0], token) && this.rightExpression.className !== 'ExpressionNode')
+                node = this.rightExpression;
+            else if (this.rightExpression && this.rightExpression.className === 'ExpressionNode')
+                node = this.rightExpression.findByToken(token);
+            return node;
         }
 
         /**
