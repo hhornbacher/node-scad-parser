@@ -1,6 +1,6 @@
 {
   "name": "scad-parser",
-  "version": "1.0.10",
+  "version": "1.0.11",
   "description": "Module to parse the abstract syntax tree of OpenSCAD files",
   "keywords": [
     "openscad",
@@ -16,10 +16,10 @@
   "author": "Harry Hornbacher <harry@harry-hornbacher.de>",
   "license": "Apache-2.0",
   "dependencies": {
+    "bluebird": "^3.5.0",
     "lodash": "^4.17.4",
     "moo": "0.3.1",
-    "nearley": "^2.8.0",
-    "nodescad": "^1.1.0"
+    "nearley": "^2.8.0"
   },
   "devDependencies": {
     "docdash": "^0.4.0",
