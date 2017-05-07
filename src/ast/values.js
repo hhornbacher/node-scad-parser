@@ -51,7 +51,7 @@ function Values(registerClass) {
          * @returns {string}
          */
         toString() {
-            return `${this.negative ? '- ' : ''}${this.value}`;
+            return `${this.negative ? '-' : ''}${this.value}`;
         }
 
         toCode() {
@@ -228,7 +228,7 @@ function Values(registerClass) {
          * @returns {string}
          */
         toString() {
-            return `${this.negative ? '- ' : ''}${this.reference}`;
+            return `${this.negative ? '-' : ''}${this.reference}`;
         }
 
         toCode() {

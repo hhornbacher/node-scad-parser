@@ -161,7 +161,9 @@ function Nodes(registerClass) {
                 return '';
             }
 
-            return children.toString();
+            if (children && _.isFunction(children.toString))
+                return children.toString();
+            return null;
         }
 
         /**
@@ -186,7 +188,11 @@ function Nodes(registerClass) {
             children: []
         }) {
             let indent = this.indentToString(options.indent);
-            return `${indent}<${this.className.replace('Node', '')}${this.paramsToString(options.params)}>${this.childrenToString(options)}</${this.className.replace('Node', '')}>`;
+            let children = this.childrenToString(options);
+            let params = this.paramsToString(options.params);
+            if (children)
+                return `${indent}<${this.className.replace('Node', '')}${params}>${children}</${this.className.replace('Node', '')}>`;
+            return `${indent}<${this.className.replace('Node', '')}${params} />`;
         }
 
         childrenToCode(options) {
@@ -265,7 +271,10 @@ function Nodes(registerClass) {
         toString(options = { indent: 0 }) {
             const indent = this.indentToString(options.indent);
             return super.toString({
-                children: this.text,
+                params: {
+                    multiline: this.multiline ? 'true' : 'false',
+                    text: JSON.stringify(this.text).replace(/"(.*)"/, '$1')
+                },
                 indent: options.indent
             })
         }
@@ -319,10 +328,10 @@ function Nodes(registerClass) {
          */
         toString(options = { indent: 0 }) {
             return super.toString({
-                children: this.value,
                 params: {
                     name: this.name,
-                    type: this.value.constructor.name
+                    type: this.value.constructor.name,
+                    value: this.value
                 },
                 indent: options.indent
             });
@@ -414,7 +423,9 @@ function Nodes(registerClass) {
          */
         toString(options = { indent: 0 }) {
             return super.toString({
-                children: this.file,
+                params: {
+                    file: this.file
+                },
                 indent: options.indent
             })
         }
@@ -671,9 +682,9 @@ function Nodes(registerClass) {
          */
         toString() {
             if (this.rightExpression === null)
-                return `${this.negative ? '- ' : ''}${this.leftExpression.toString()}`;
+                return `${this.negative ? '-' : ''}${this.leftExpression.toString()}`;
             if (this.rightExpression !== null && this.operator !== null)
-                return `${this.negative ? '- ' : ''}(${this.leftExpression.toString()}${this.operator}${this.rightExpression.toString()})`;
+                return `${this.negative ? '-' : ''}(${this.leftExpression.toString()}${this.operator}${this.rightExpression.toString()})`;
         }
 
         toCode(options = { indent: 0 }) {
