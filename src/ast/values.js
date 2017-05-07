@@ -53,6 +53,10 @@ function Values(registerClass) {
         toString() {
             return `${this.negative ? '- ' : ''}${this.value}`;
         }
+
+        toCode() {
+            return `${this.negative ? '-' : ''}${this.value}`;
+        }
     }
 
     /**
@@ -94,6 +98,9 @@ function Values(registerClass) {
      * @param {string} value The value
      */
     class StringValue extends BaseValue {
+        toCode() {
+            return `"${this.value}"`;
+        }
     }
     registerClass(StringValue);
 
@@ -125,6 +132,14 @@ function Values(registerClass) {
                 });
             }
             return out;
+        }
+
+        toString() {
+            return `[${_.map(this.value, value => value.toString()).join(', ')}]`;
+        }
+
+        toCode() {
+            return `[${_.map(this.value, value => value.toCode()).join(', ')}]`;
         }
     }
     registerClass(VectorValue);
@@ -169,6 +184,10 @@ function Values(registerClass) {
         toString() {
             return `[${this.start.toString()}:${this.increment.toString()}:${this.end.toString()}]`;
         }
+
+        toCode() {
+            return `[${this.start.toCode()}:${this.increment.toCode()}:${this.end.toCode()}]`;
+        }
     }
     registerClass(RangeValue);
 
@@ -210,6 +229,10 @@ function Values(registerClass) {
          */
         toString() {
             return `${this.negative ? '- ' : ''}${this.reference}`;
+        }
+
+        toCode() {
+            return `${this.negative ? '-' : ''}${this.reference}`;
         }
     }
     registerClass(ReferenceValue);
