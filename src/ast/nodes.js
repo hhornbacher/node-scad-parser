@@ -188,6 +188,25 @@ function Nodes(registerClass) {
             let indent = this.indentToString(options.indent);
             return `${indent}<${this.className.replace('Node', '')}${this.paramsToString(options.params)}>${this.childrenToString(options)}</${this.className.replace('Node', '')}>`;
         }
+
+        childrenToCode(options) {
+            let { indent: indentCount, children } = options;
+            let indent = this.indentToString(indentCount);
+
+            if (children.length > 0)
+                return '\n'
+                    + _.map(children, child => child.toCode({ indent: indentCount + 1 }) + '\n').join('')
+                    + indent;
+        }
+
+        toCode(options = {
+            indent: 0,
+            params: {},
+            children: []
+        }) {
+            let indent = this.indentToString(options.indent);
+            return `${indent}${this.childrenToCode(options)}`;
+        }
     }
     registerClass(Node);
 
@@ -212,6 +231,10 @@ function Nodes(registerClass) {
          */
         toString(options = { indent: 0 }) {
             return super.toString({ children: this.children, indent: options.indent })
+        }
+
+        toCode(options = { indent: -1 }) {
+            return super.toCode({ children: this.children, indent: options.indent })
         }
     }
     registerClass(RootNode);
@@ -245,6 +268,13 @@ function Nodes(registerClass) {
                 children: this.text,
                 indent: options.indent
             })
+        }
+
+        toCode(options = { indent: 0 }) {
+            let indent = this.indentToString(options.indent);
+            if (this.multiline)
+                return `${indent}/* ${_.map(this.text.split('\n'), line => line.trim()).join(`\n${indent}`)} */`;
+            return `${indent}// ${this.text}`;
         }
     }
     registerClass(CommentNode);
@@ -297,8 +327,69 @@ function Nodes(registerClass) {
                 indent: options.indent
             });
         }
+
+        toCode(options = { indent: 0 }) {
+            let indent = this.indentToString(options.indent);
+            return `${indent}${this.name} = ${this.value.toCode()};`;
+        }
     }
     registerClass(VariableNode);
+
+    /**
+     * Parameter definition
+     * 
+     * @class ParameterNode
+     * @extends {VariableNode}
+     * 
+     * @param {Array.Token} tokens The tokens of this node
+     * @param {string} name 
+     * @param {any} value 
+     */
+    class ParameterNode extends VariableNode {
+        constructor(tokens, name, value = null) {
+            super(tokens, name, value);
+        }
+
+        toString(options = { indent: 0 }) {
+            if (this.value)
+                return `${this.name} = ${this.value.toString()}`;
+            return `${this.name}`;
+        }
+
+        toCode(options = { indent: 0 }) {
+            if (this.name)
+                return `${this.name} = ${this.value.toCode()}`;
+            return `${this.name}`;
+        }
+    }
+    registerClass(ParameterNode);
+
+    /**
+     * Argument definition
+     * 
+     * @class ArgumentNode
+     * @extends {VariableNode}
+     * @param {any} value 
+     * @param {string} name 
+     */
+    class ArgumentNode extends VariableNode {
+        constructor(tokens, value, name = null) {
+            super(tokens, name, value);
+        }
+
+        toString(options = { indent: 0 }) {
+            if (this.name)
+                return `${this.name} = ${this.value.toString()}`;
+            return `${this.value.toString()}`;
+        }
+
+        toCode(options = { indent: 0 }) {
+            if (this.name)
+                return `${this.name} = ${this.value.toCode()}`;
+            return `${this.value.toCode()}`;
+        }
+    }
+    registerClass(ArgumentNode);
 
     /**
      * Include statement
@@ -327,6 +418,11 @@ function Nodes(registerClass) {
                 indent: options.indent
             })
         }
+
+        toCode(options = { indent: 0 }) {
+            let indent = this.indentToString(options.indent);
+            return `${indent}include <${this.file}>;`;
+        }
     }
     registerClass(IncludeNode);
 
@@ -337,6 +433,10 @@ function Nodes(registerClass) {
      * @extends {IncludeNode}
      */
     class UseNode extends IncludeNode {
+        toCode(options = { indent: 0 }) {
+            let indent = this.indentToString(options.indent);
+            return `${indent}use <${this.file}>;`;
+        }
     }
     registerClass(UseNode);
 
@@ -376,6 +476,11 @@ function Nodes(registerClass) {
                 indent: options.indent,
                 params
             });
+        }
+
+        toCode(options = { indent: 0 }) {
+            let indent = this.indentToString(options.indent);
+            return `${indent}module ${this.name}() {${super.toCode({ children: this.children, indent: options.indent })}${indent}}`;
         }
     }
     registerClass(ModuleNode);
@@ -436,6 +541,13 @@ function Nodes(registerClass) {
                 params
             });
         }
+
+        toCode(options = { indent: 0 }) {
+            let indent = this.indentToString(options.indent);
+            if (this.children > 0)
+                return
+            return `${indent}${this.modifier || ''}${this.name}();`;
+        }
     }
     registerClass(ActionNode);
 
@@ -475,6 +587,11 @@ function Nodes(registerClass) {
                 indent: options.indent,
                 params
             });
+        }
+
+        toCode(options = { indent: 0 }) {
+            let indent = this.indentToString(options.indent);
+            return `${indent}function ${this.name}() = ${this.expression.toCode()};`;
         }
     }
     registerClass(FunctionNode);
@@ -516,10 +633,10 @@ function Nodes(registerClass) {
          */
         findByToken(token) {
             let node = null;
-/*            console.log(this.toString());
-            console.log(this.leftExpression.tokens[0], this.rightExpression ? this.rightExpression.tokens[0] : null);
-            console.log(this.leftExpression.tokens[0], token);
-            console.log(_.isMatch(this.leftExpression.tokens[0], token));*/
+            /*            console.log(this.toString());
+                        console.log(this.leftExpression.tokens[0], this.rightExpression ? this.rightExpression.tokens[0] : null);
+                        console.log(this.leftExpression.tokens[0], token);
+                        console.log(_.isMatch(this.leftExpression.tokens[0], token));*/
             if (this.rightExpression) {
                 console.log(this.rightExpression.tokens[0], token);
                 console.log(_.isMatch(this.rightExpression.tokens[0], token));
@@ -554,9 +671,16 @@ function Nodes(registerClass) {
          */
         toString() {
             if (this.rightExpression === null)
-                return `${this.negative ? '- ' : ''}${this.leftExpression}`;
+                return `${this.negative ? '- ' : ''}${this.leftExpression.toString()}`;
             if (this.rightExpression !== null && this.operator !== null)
-                return `${this.negative ? '- ' : ''}(${this.leftExpression}${this.operator}${this.rightExpression})`;
+                return `${this.negative ? '- ' : ''}(${this.leftExpression.toString()}${this.operator}${this.rightExpression.toString()})`;
+        }
+
+        toCode(options = { indent: 0 }) {
+            if (this.rightExpression === null)
+                return `${this.negative ? '-' : ''}${this.leftExpression.toCode()}`;
+            if (this.rightExpression !== null && this.operator !== null)
+                return `${this.negative ? '-' : ''}(${this.leftExpression.toCode()}${this.operator}${this.rightExpression.toCode()})`;
         }
     }
     registerClass(ExpressionNode);

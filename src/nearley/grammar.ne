@@ -26,7 +26,7 @@ Statement ->
 	| %mlComment {% d => new CommentNode(pickTokens(d), d[0].value, true) %}
 	| %include %eos {% d => new IncludeNode(pickTokens(d), d[0].value) %}
 	| %use %eos {% d => new UseNode(pickTokens(d), d[0].value) %}
-	| %moduleDefinition %rparent %lblock Block %rblock {% d => new ModuleNode(pickTokens(d), d[0].value, d[3]) %}
+	| %moduleDefinition %rparent %lblock Block %rblock {% d => new ModuleNode(pickTokens(d), d[0].value, null, d[3]) %}
 	| %moduleDefinition Parameters %rparent %lblock Block %rblock {% d => new ModuleNode(pickTokens(d), d[0].value, d[1], d[4]) %}
 	| %functionDefinition %rparent %assign Expression %eos {% d => new FunctionNode(pickTokens(d), d[0].value, null, d[3]) %}
 	| %functionDefinition Parameters %rparent %assign Expression %eos {% d => new FunctionNode(pickTokens(d), d[0].value, d[1], d[4]) %}
@@ -75,8 +75,8 @@ Parameters ->
 	| Parameters %comma Parameter {% d => _.concat(d[0], [d[2]]) %}
 
 Parameter ->
-	%identifier {% id %}
-	| %identifier %assign Expression {% d => ([d[0], d[2]]) %}
+	%identifier {% d => new ParameterNode(pickTokens(d), d[0].value) %}
+	| %identifier %assign Expression {% d => new ParameterNode(pickTokens(d), d[0].value, d[2]) %}
 
 
 
@@ -89,5 +89,5 @@ Arguments ->
 	| Arguments %comma Argument {% d => _.concat(d[0], [d[2]]) %}
 
 Argument ->
-	Expression {% id %}
-	| %identifier %assign Expression {% d => ([d[0], d[4]]) %}
+	Expression {% d => new ArgumentNode(pickTokens(d), d[0].value) %}
+	| %identifier %assign Expression {% d => new ArgumentNode(pickTokens(d), d[0].value, d[2]) %}

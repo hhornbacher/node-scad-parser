@@ -26,7 +26,7 @@ var grammar = {
     {"name": "Statement", "symbols": [mlComment], "postprocess": d => new CommentNode(pickTokens(d), d[0].value, true)},
     {"name": "Statement", "symbols": [include, eos], "postprocess": d => new IncludeNode(pickTokens(d), d[0].value)},
     {"name": "Statement", "symbols": [use, eos], "postprocess": d => new UseNode(pickTokens(d), d[0].value)},
-    {"name": "Statement", "symbols": [moduleDefinition, rparent, lblock, "Block", rblock], "postprocess": d => new ModuleNode(pickTokens(d), d[0].value, d[3])},
+    {"name": "Statement", "symbols": [moduleDefinition, rparent, lblock, "Block", rblock], "postprocess": d => new ModuleNode(pickTokens(d), d[0].value, null, d[3])},
     {"name": "Statement", "symbols": [moduleDefinition, "Parameters", rparent, lblock, "Block", rblock], "postprocess": d => new ModuleNode(pickTokens(d), d[0].value, d[1], d[4])},
     {"name": "Statement", "symbols": [functionDefinition, rparent, assign, "Expression", eos], "postprocess": d => new FunctionNode(pickTokens(d), d[0].value, null, d[3])},
     {"name": "Statement", "symbols": [functionDefinition, "Parameters", rparent, assign, "Expression", eos], "postprocess": d => new FunctionNode(pickTokens(d), d[0].value, d[1], d[4])},
@@ -56,8 +56,8 @@ var grammar = {
         } },
     {"name": "Parameters", "symbols": ["Parameter"], "postprocess": id},
     {"name": "Parameters", "symbols": ["Parameters", comma, "Parameter"], "postprocess": d => _.concat(d[0], [d[2]])},
-    {"name": "Parameter", "symbols": [identifier], "postprocess": id},
-    {"name": "Parameter", "symbols": [identifier, assign, "Expression"], "postprocess": d => ([d[0], d[2]])},
+    {"name": "Parameter", "symbols": [identifier], "postprocess": d => new ParameterNode(pickTokens(d), d[0].value)},
+    {"name": "Parameter", "symbols": [identifier, assign, "Expression"], "postprocess": d => new ParameterNode(pickTokens(d), d[0].value, d[2])},
     {"name": "VectorExpression$ebnf$1", "symbols": [comment], "postprocess": id},
     {"name": "VectorExpression$ebnf$1", "symbols": [], "postprocess": function(d) {return null;}},
     {"name": "VectorExpression$ebnf$2", "symbols": [comment], "postprocess": id},
@@ -70,8 +70,8 @@ var grammar = {
     {"name": "VectorExpression", "symbols": ["VectorExpression", comma, "VectorExpression$ebnf$3", "Expression", "VectorExpression$ebnf$4"], "postprocess": d => _.concat(d[0], [d[3]])},
     {"name": "Arguments", "symbols": ["Argument"], "postprocess": id},
     {"name": "Arguments", "symbols": ["Arguments", comma, "Argument"], "postprocess": d => _.concat(d[0], [d[2]])},
-    {"name": "Argument", "symbols": ["Expression"], "postprocess": id},
-    {"name": "Argument", "symbols": [identifier, assign, "Expression"], "postprocess": d => ([d[0], d[4]])}
+    {"name": "Argument", "symbols": ["Expression"], "postprocess": d => new ArgumentNode(pickTokens(d), d[0].value)},
+    {"name": "Argument", "symbols": [identifier, assign, "Expression"], "postprocess": d => new ArgumentNode(pickTokens(d), d[0].value, d[2])}
 ]
   , ParserStart: "Block"
 }
