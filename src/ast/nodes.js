@@ -525,11 +525,11 @@ function Nodes(registerClass) {
      * @param {any} [params=[]] 
      */
     class ActionNode extends Node {
-        constructor(tokens, name, params = []) {
+        constructor(tokens, name, args = []) {
             super(null, tokens);
             this.name = name.replace(/([!#\*\%]?)(.*)/, '$2');
             this.modifier = name.replace(/([!#\*\%]?)(.*)/, '$1') || null;
-            this.params = params;
+            this.args = args;
         }
 
         /**
@@ -544,8 +544,8 @@ function Nodes(registerClass) {
             };
             if (this.modifier !== null)
                 params.modifier = this.modifier;
-            if (this.params !== null && this.params.length > 0)
-                params.params = this.params;
+            if (this.args !== null && this.args.length > 0)
+                params.args = this.args.join(', ');
             return super.toString({
                 indent: options.indent,
                 children: this.children,

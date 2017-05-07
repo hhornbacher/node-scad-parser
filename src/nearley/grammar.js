@@ -70,8 +70,8 @@ var grammar = {
     {"name": "VectorExpression", "symbols": ["VectorExpression", comma, "VectorExpression$ebnf$3", "Expression", "VectorExpression$ebnf$4"], "postprocess": d => _.concat(d[0], [d[3]])},
     {"name": "Arguments", "symbols": ["Argument"], "postprocess": id},
     {"name": "Arguments", "symbols": ["Arguments", comma, "Argument"], "postprocess": d => _.concat(d[0], [d[2]])},
-    {"name": "Argument", "symbols": ["Expression"], "postprocess": d => new ArgumentNode(pickTokens(d), d[0].value)},
-    {"name": "Argument", "symbols": [identifier, assign, "Expression"], "postprocess": d => new ArgumentNode(pickTokens(d), d[0].value, d[2])}
+    {"name": "Argument", "symbols": ["Expression"], "postprocess": d => new ArgumentNode(pickTokens(d), d[0])},
+    {"name": "Argument", "symbols": [identifier, assign, "Expression"], "postprocess": d => new ArgumentNode(pickTokens(d), d[2], d[0].value)}
 ]
   , ParserStart: "Block"
 }

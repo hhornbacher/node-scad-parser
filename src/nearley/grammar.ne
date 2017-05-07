@@ -89,5 +89,5 @@ Arguments ->
 	| Arguments %comma Argument {% d => _.concat(d[0], [d[2]]) %}
 
 Argument ->
-	Expression {% d => new ArgumentNode(pickTokens(d), d[0].value) %}
-	| %identifier %assign Expression {% d => new ArgumentNode(pickTokens(d), d[0].value, d[2]) %}
+	Expression {% d => new ArgumentNode(pickTokens(d), d[0]) %}
+	| %identifier %assign Expression {% d => new ArgumentNode(pickTokens(d), d[2], d[0].value) %}
