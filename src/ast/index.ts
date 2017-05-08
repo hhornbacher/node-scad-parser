@@ -2,22 +2,11 @@
  * Abstract syntax representation of the scad language
  * @module ast
  */
-const _ = require('lodash'),
-    inspect = require('util').inspect;
+import * as _ from 'lodash';
+import {inspect} from 'util';
 
-
-
-/**
- * Register a class as global
- * @param {Class} cl The class to register 
- * @param {String} name Optional: To set the class name manually
- */
-const registerClass = function (cl, name) {
-    global[name || cl.name] = cl;
-};
-
-// Register lodash as global
-registerClass(_, '_');
+export * from './values';
+export * from './nodes';
 
 /**
  * Location in the code
@@ -26,7 +15,13 @@ registerClass(_, '_');
  * 
  * @param {Token} token The token from which to get the positional information
  */
-class Location {
+export class Location {
+    offset: Number;
+    size: Number;
+    lineBreaks: Number;
+    line: Number;
+    column: Number;
+
     constructor(token = { offset:0, size:0, lineBreaks:0, line:1, col:1 }) {
         let { offset, size, lineBreaks, line, col } = token;
         this.offset = offset;
@@ -40,11 +35,4 @@ class Location {
         return `[Location: Offset=${this.offset}, Size=${this.size}, lineBreaks=${this.lineBreaks}, Line=${this.line}, Column=${this.column}]`;
     }
 }
-registerClass(Location);
-
-// Register value classes as global
-require('./values')(registerClass);
-
-// Register node classes as global
-require('./nodes')(registerClass);
 
