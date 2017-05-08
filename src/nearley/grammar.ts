@@ -1,7 +1,6 @@
 // Generated automatically by nearley
 // http://github.com/Hardmath123/nearley
-(function () {
-function id(x) {return x[0]; }
+function id(d:any[]):any {return d[0];}
  
 	
 /**
@@ -18,7 +17,10 @@ const pickTokens = (match) => _.filter(match, token => {
 	return false;
 });
 
-var grammar = {
+interface NearleyGrammar {ParserRules:NearleyRule[]; ParserStart:string};
+interface NearleyRule {name:string; symbols:NearleySymbol[]; postprocess?:(d:any[],loc?:number,reject?:{})=>any};
+type NearleySymbol = string | {literal:any} | {test:(token:any) => boolean};
+export var grammar : NearleyGrammar = {
     ParserRules: [
     {"name": "Block", "symbols": ["Statement"]},
     {"name": "Block", "symbols": ["Block", "Statement"], "postprocess": d => _.concat(d[0], d[1])},
@@ -59,14 +61,14 @@ var grammar = {
     {"name": "Parameter", "symbols": [identifier], "postprocess": d => new ParameterNode(pickTokens(d), d[0].value)},
     {"name": "Parameter", "symbols": [identifier, assign, "Expression"], "postprocess": d => new ParameterNode(pickTokens(d), d[0].value, d[2])},
     {"name": "VectorExpression$ebnf$1", "symbols": [comment], "postprocess": id},
-    {"name": "VectorExpression$ebnf$1", "symbols": [], "postprocess": function(d) {return null;}},
+    {"name": "VectorExpression$ebnf$1", "symbols": [], "postprocess": (d) => null},
     {"name": "VectorExpression$ebnf$2", "symbols": [comment], "postprocess": id},
-    {"name": "VectorExpression$ebnf$2", "symbols": [], "postprocess": function(d) {return null;}},
+    {"name": "VectorExpression$ebnf$2", "symbols": [], "postprocess": (d) => null},
     {"name": "VectorExpression", "symbols": ["VectorExpression$ebnf$1", "Expression", "VectorExpression$ebnf$2"], "postprocess": d => ([d[1]])},
     {"name": "VectorExpression$ebnf$3", "symbols": [comment], "postprocess": id},
-    {"name": "VectorExpression$ebnf$3", "symbols": [], "postprocess": function(d) {return null;}},
+    {"name": "VectorExpression$ebnf$3", "symbols": [], "postprocess": (d) => null},
     {"name": "VectorExpression$ebnf$4", "symbols": [comment], "postprocess": id},
-    {"name": "VectorExpression$ebnf$4", "symbols": [], "postprocess": function(d) {return null;}},
+    {"name": "VectorExpression$ebnf$4", "symbols": [], "postprocess": (d) => null},
     {"name": "VectorExpression", "symbols": ["VectorExpression", comma, "VectorExpression$ebnf$3", "Expression", "VectorExpression$ebnf$4"], "postprocess": d => _.concat(d[0], [d[3]])},
     {"name": "Arguments", "symbols": ["Argument"], "postprocess": id},
     {"name": "Arguments", "symbols": ["Arguments", comma, "Argument"], "postprocess": d => _.concat(d[0], [d[2]])},
@@ -75,9 +77,3 @@ var grammar = {
 ]
   , ParserStart: "Block"
 }
-if (typeof module !== 'undefined'&& typeof module.exports !== 'undefined') {
-   module.exports = grammar;
-} else {
-   window.grammar = grammar;
-}
-})();

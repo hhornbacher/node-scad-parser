@@ -40,25 +40,37 @@ const rand = {
       return rand.pick(miscStatements);
     return _.times(count, () => rand.statement());
   },
-  value: () => {
+  vector: () => {
+    return `[${_.times(rand.integer(3, 10), () => rand.value(true)).join(', ')}]`;
+  },
+  value: (noVect = false) => {
     let value = 1;
-    switch(rand.integer(0,100)%3) {
+    let mod = 5;
+    if (noVect)
+      mod = 4;
+    switch (rand.integer(0, 100) % mod) {
       case 0:
-      value=rand.integer(-10e6, 10e6);
-      break;
+        value = rand.integer(-10e6, 10e6);
+        break;
       case 1:
-      value=rand.float(-10e6, 10e6, true);
-      break;
+        value = rand.float(-10e6, 10e6, true);
+        break;
       case 2:
-      value=rand.float(-10e6, 10e6, true).toExponential();
-      break;
+        value = rand.float(-10e6, 10e6, true).toExponential();
+        break;
+      case 3:
+        value = rand.identifier();
+        break;
+      case 4:
+        value = rand.vector();
+        break;
     }
     return value;
   },
   expression: () => {
-    let length = rand.integer(2,6);
+    let length = rand.integer(1, 6);
     let values = _.times(length, () => rand.value());
-    let operators = _.times(length-1, () => rand.pick(randMaps.operators));
+    let operators = _.times(length - 1, () => rand.pick(randMaps.operators));
 
     return _.map(values, (value, index) => {
       return `${value}${operators[index] ? operators[index] : ''}`;
@@ -102,10 +114,9 @@ describe('SCADParser', function () {
           expect(root.children[0].value).to.be.a(varType);
 
           if (
-            varType !== VectorValue && 
-            varType !== RangeValue && 
-            varType !== ExpressionNode
-            ) {
+            varType !== VectorValue &&
+            varType !== RangeValue
+          ) {
             let cleanValue = value.toString().replace('-', '').replace(/"([^"]*)"/, '$1');
             if (varType === BooleanValue)
               cleanValue = cleanValue === 'true' ? true : false;
@@ -160,10 +171,6 @@ describe('SCADParser', function () {
 
       for (let i = 0; i < 5; i++) {
         variableTest(rand.identifier(), ReferenceValue);
-      }
-
-      for (let i = 0; i < 5; i++) {
-        variableTest(rand.expression(), ExpressionNode);
       }
     });
 
