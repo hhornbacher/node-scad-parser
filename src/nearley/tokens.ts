@@ -2,32 +2,9 @@
  * Prepare and initialize tokens to be used in the grammar
  * @module nearley/tokens
  */
-const _ = require('lodash');
+import * as _ from 'lodash';
 
-
-/**
- * Register token definitions globally for use in the grammar definition
- * @param {Object} tokens Token difinitions 
- */
-const registerTokens = (tokens) => {
-    _.each(tokens, (value, key) => {
-        if (value instanceof Array || value.value instanceof Array) {
-            const keywords = value;
-            _.each(keywords, (keyword) => {
-                // add tester functions for each
-                global[key + '_' + keyword] = {
-                    test: tok =>
-                        tok.type === key && tok.value === keyword
-                };
-            });
-        }
-
-        // add tester function for `key`
-        global[key] = { test: tok => tok.type === key }
-    });
-}
-
-const tokens = {
+export const tokens = {
     include: { match: /include\s*<(.+)>/, lineBreaks: true },
     use: { match: /use\s*<(.+)>/, lineBreaks: true },
     moduleDefinition: { match: /module\s*([A-Za-z_$][A-Za-z0-9_]*)\s*\(/, lineBreaks: true },
@@ -60,5 +37,24 @@ const tokens = {
     LexerError: require('moo').error
 }
 
-module.exports = () => registerTokens(tokens);
-module.exports.tokens = tokens;
+
+/**
+ * Register token definitions globally for use in the grammar definition
+ */
+export default function registerTokens() {
+    _.each(tokens, (value, key) => {
+        if (value instanceof Array || value.value instanceof Array) {
+            const keywords = value;
+            _.each(keywords, (keyword) => {
+                // add tester functions for each
+                global[key + '_' + keyword] = {
+                    test: (tok:any) =>
+                        tok.type === key && tok.value === keyword
+                };
+            });
+        }
+
+        // add tester function for `key`
+        global[key] = { test: (tok:any) => tok.type === key }
+    });
+}
