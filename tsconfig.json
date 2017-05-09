@@ -6,10 +6,8 @@
     "declaration": true,
     "rootDir": "src",
     "outDir": "lib",
-    "allowJs": true,
-    "checkJs": true,
-    "noUnusedLocals": true,
-    "noUnusedParameters": true,
+/*    "noUnusedLocals": true,
+    "noUnusedParameters": true,*/
     "typeRoots": [
       "node_modules/@types"
     ]
