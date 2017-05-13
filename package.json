@@ -2,6 +2,49 @@
   "name": "scad-parser",
   "version": "1.0.11",
   "description": "Module to parse the abstract syntax tree of OpenSCAD files",
+  "author": "Harry Hornbacher <harry@harry-hornbacher.de>",
+  "license": "Apache-2.0",
+  "main": "lib/index",
+  "types": "lib/index",
+  "scripts": {
+    "prepublish": "npm run build",
+    "build": "npm run build:grammar && npm run build:lib && npm run build:docs",
+    "build:grammar": "nearleyc src/nearley/grammar.ne > src/nearley/grammar.ts 2> src/nearley/grammar.err && rm -f src/nearley/grammar.err",
+    "build:docs": "typedoc --out ./docs/ --name 'SCADParser' --readme ./README.md --module commonjs --target es5 --exclude '**/test.ts'",
+    "build:lib": "tsc --pretty",
+    "test": "npm run test:default",
+    "test:live": "mocha --watch lib/test.js",
+    "test:default": "mocha lib/test.js",
+    "start": "nodemon --exec ./node_modules/.bin/ts-node -- ./lib/cli.js"
+  },
+  "dependencies": {
+    "bluebird": "^3.5.0",
+    "lodash": "^4.17.4",
+    "moo": "^0.3.2",
+    "nearley": "hhornbacher/nearley#dfe65a82a9f6f1e28978f8fac63cfb86baf523c2",
+    "tree-morph": "^0.2.1"
+  },
+  "devDependencies": {
+    "@types/bluebird": "^3.5.3",
+    "@types/lodash": "^4.14.64",
+    "@types/node": "^7.0.18",
+    "expect.js": "^0.3.1",
+    "istanbul": "^0.4.5",
+    "mocha": "^3.3.0",
+    "nodemon": "^1.11.0",
+    "random-js": "^1.0.8",
+    "ts-node": "^3.0.4",
+    "typedoc": "^0.7.0",
+    "typescript": "^2.3.2"
+  },
+  "homepage": "https://github.com/hhornbacher/node-scad-parser#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hhornbacher/node-scad-parser.git"
+  },
+  "bugs": {
+    "url": "https://github.com/hhornbacher/node-scad-parser/issues"
+  },
   "keywords": [
     "openscad",
     "cad",
@@ -11,43 +54,5 @@
     "parser",
     "lexer",
     "ast"
-  ],
-  "main": "lib/index",
-  "types": "lib/index",
-  "author": "Harry Hornbacher <harry@harry-hornbacher.de>",
-  "license": "Apache-2.0",
-  "dependencies": {
-    "bluebird": "^3.5.0",
-    "lodash": "^4.17.4",
-    "moo": "0.3.1",
-    "nearley": "^2.8.0"
-  },
-  "devDependencies": {
-    "@types/bluebird": "^3.5.3",
-    "@types/lodash": "^4.14.64",
-    "@types/node": "^7.0.18",
-    "docdash": "^0.4.0",
-    "expect.js": "^0.3.1",
-    "istanbul": "^0.4.5",
-    "jsdoc": "^3.4.3",
-    "mocha": "^3.3.0",
-    "nodemon": "^1.11.0",
-    "random-js": "^1.0.8",
-    "ts-node": "^3.0.4",
-    "typescript": "^2.3.2"
-  },
-  "scripts": {
-    "test": "istanbul cover _mocha src/test.js -- --perf-basic-prof",
-    "live-test": "mocha --watch src/test.js",
-    "generate-docs": "jsdoc -c jsdoc.json",
-    "start": "nodemon --exec ./node_modules/.bin/ts-node -- ./src/cli.js"
-  },
-  "homepage": "https://github.com/hhornbacher/node-scad-parser#readme",
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/hhornbacher/node-scad-parser.git"
-  },
-  "bugs": {
-    "url": "https://github.com/hhornbacher/node-scad-parser/issues"
-  }
+  ]
 }
