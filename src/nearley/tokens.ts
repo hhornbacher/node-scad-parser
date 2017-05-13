@@ -4,6 +4,17 @@
  */
 import * as _ from 'lodash';
 
+export interface Token {
+    type: string;
+    value: string;
+    toString: Function;
+    offset: number;
+    size: number;
+    lineBreaks: number;
+    line: number;
+    col: number;
+}
+
 export const tokens = {
     include: { match: /include\s*<(.+)>/, lineBreaks: true },
     use: { match: /use\s*<(.+)>/, lineBreaks: true },
@@ -37,24 +48,19 @@ export const tokens = {
     LexerError: require('moo').error
 }
 
+export let tokenRules: any = _.each(tokens, (value, key) => {
+    if (value instanceof Array || value.value instanceof Array) {
+        const keywords = value;
+        _.each(keywords, (keyword) => {
+            // add tester functions for each
+            tokenRules[key + '_' + keyword] = {
+                test: (tok: any) =>
+                    tok.type === key && tok.value === keyword
+            };
+        });
+    }
 
-/**
- * Register token definitions globally for use in the grammar definition
- */
-export default function registerTokens() {
-    _.each(tokens, (value, key) => {
-        if (value instanceof Array || value.value instanceof Array) {
-            const keywords = value;
-            _.each(keywords, (keyword) => {
-                // add tester functions for each
-                global[key + '_' + keyword] = {
-                    test: (tok:any) =>
-                        tok.type === key && tok.value === keyword
-                };
-            });
-        }
+    // add tester function for `key`
+    tokenRules[key] = { test: (tok: any) => tok.type === key }
+});;
 
-        // add tester function for `key`
-        global[key] = { test: (tok:any) => tok.type === key }
-    });
-}
