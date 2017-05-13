@@ -5,7 +5,7 @@
         "commands": [
             {
                 "match": "grammar.ne",
-                "cmd": "nearleyc ${file} > ${fileDirname}/${fileBasenameNoExt}.ts 2> ${fileDirname}/${fileBasenameNoExt}.err && rm ${fileDirname}/${fileBasenameNoExt}.err"
+                "cmd": "cd ${workspaceRoot}; npm run build:grammar"
             }
         ]
     }
