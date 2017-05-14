@@ -1,51 +1,60 @@
-const _ = require('lodash'),
-  Promise = require('bluebird'),
-  fs = require('fs'),
-  path = require('path'),
-  childProcess = require('child_process'),
-  moo = require('moo'),
-  nearley = require("nearley"),
-  grammar = require("./nearley/grammar"),
-  tokens = require("./nearley/tokens").tokens,
-  inspect = require('util').inspect;
-
-const lexer = moo.compile(tokens);
+import * as _ from 'lodash';
+import * as Promise from 'bluebird';
+import * as fs from 'fs';
+import * as path from 'path';
+import * as childProcess from 'child_process';
+import * as moo from 'moo';
+import * as nearley from 'nearley';
+import { grammar } from './nearley/grammar';
+import { tokens } from './nearley/tokens';
+import {
+  RootNode,
+  Location
+} from './ast';
 
 /**
  * Parser for OpenSCAD code
  * 
- * @class SCADParser
+ *
  * 
  */
-class SCADParser {
+export default class SCADParser {
+  private ignoredTokens: Array<string>;
+  private results: Array<string>;
+  private cache: Array<RootNode>;
+  private codeCache: Array<string>;
+  private tokenCache: any;
+  private lexer: any;
+
   constructor() {
     this.ignoredTokens = ['whitespace', 'eol'];
-    this.results = null;
+    this.results = [];
     this.cache = [];
     this.codeCache = [];
     this.tokenCache = [];
+    this.lexer = moo.compile(tokens);
   }
 
   /**
    * Parse the supplied code
    * 
-   * @param {string} code Cointains the code to be parsed
-   * @param {string} file Name of the parsed file
-   * @returns {RootNode} Root node of the code's AST
+   *
+   *
+   *
    */
-  parse(code, file) {
+  parse(code: string, file: string) {
     this.tokenCache[file] = [];
     try {
       const parser = new nearley.Parser(grammar.ParserRules, grammar.ParserStart);
       let token;
 
       // Feed whole code to lexer
-      lexer.reset(code);
+      this.lexer.reset(code);
 
       // Iterate through code
-      while (token = lexer.next()) {
+      while (token = this.lexer.next()) {
         // Ignore token, if defined
-        if (this.ignoredTokens.includes(token.type))
+        if (_.includes(this.ignoredTokens, token.type))
           continue;
 
         // Capture token
@@ -87,16 +96,16 @@ class SCADParser {
   /**
    * Render the supplied code (with OpenSCAD)
    * 
-   * @param {string} code Cointains the code to be parsed
-   * @param {string} file Name of the parsed file
-   * @param {object} options Options passed to `nodescad`
-   * @returns {RootNode} Root node of the code's AST
+   *
+   *
+   *
+   *
    */
-  render(code, file, options) {
-    const writeFile = Promise.promisify(fs.writeFile);
+  render(code: string, file: string, options: any) {
+    const writeFile: (file: string, enc: string) => Promise<{}> = Promise.promisify(fs.writeFile);
     const exec = Promise.promisify(childProcess.exec);
 
-    const render = (options) => {
+    const render = (options: any) => {
       return exec(
         options.binaryPath
         + ' -o ' + options.outputFile
@@ -128,19 +137,12 @@ class SCADParser {
   /**
    * Parse the abstract syntax tree
    * 
-   * @param {string} file Path to the code file
-   * @param {string} [code=null] Code of the file to parse (Only supplied, if the file content was read before)
-   * @returns {RootNode} Root node of the code's AST
+   *
+   *
+   *
    */
-  parseAST(file, code = null) {
-    /*    if (this.cache[file])
-          return this.cache[file];*/
-
-    if (!_.isString(file) && !_.isString(code))
-      throw new Error('You have to pass either code or file parameter!');
-
-    let result;
-    if (code) {
+  parseAST(file: string, code: string = '') {
+    if (code !== '') {
       this.codeCache[file] = code;
       this.cache[file] = this.parse(code, file);
     }
@@ -153,16 +155,16 @@ class SCADParser {
     return this.cache[file];
   }
 
-  findTokens(value = null, type = null, file) {
-    let find = {};
-    if (value)
+  findTokens(value: string = '', type: string = '', file) {
+    let find: { value?: string, type?: string } = {};
+    if (value !== '')
       find.value = value;
-    if (type)
+    if (type !== '')
       find.type = type;
     return _.filter(this.tokenCache[file], find);
   }
 
-  getToken(column, line, file) {
+  getToken(column: number, line: number, file: string) {
     let out = null;
     _.each(this.tokenCache[file], token => {
       if (
@@ -179,14 +181,14 @@ class SCADParser {
   /**
    * Get an except of the code file
    * 
-   * @param {string} file Path to the code file
-   * @param {Location} location Location of interest
-   * @param {number} [lines=3] Coount of lines to print before and after the line of interest
-   * @returns {string} The code excerpt string
+   *
+   *
+   *
+   *
    * 
-   * @memberOf SCADParser
+   *
    */
-  getCodeExcerpt(file, location, lines = 3) {
+  getCodeExcerpt(file: string, location: Location, lines = 3) {
     let code = this.codeCache[file].split('\n');
 
     let start = location.line - (lines + 2);
@@ -197,12 +199,11 @@ class SCADParser {
       end = code.length - 1;
     code = code.slice(start, location.line + (lines - 1));
 
-    function pad(n, width, z) {
-      z = z || '0';
-      n = n + '';
-      return n.length >= width ? n : new Array(width - n.length + 1).join(z) + n;
+    function pad(n: number, width: number) {
+      let nStr = n.toString();
+      return nStr.length >= width ? nStr : new Array(width - nStr.length + 1).join('0') + nStr;
     }
-    function drawMarker(indent) {
+    function drawMarker(indent: number) {
       return _.times(indent, () => ' ').join('') + _.times(location.column + 1, () => ' ').join('')
         + '^' + _.times(location.size - 2, () => '-').join('') + '^';
     }
@@ -215,5 +216,3 @@ class SCADParser {
     }).join('\n');
   }
 }
-
-module.exports = SCADParser;
