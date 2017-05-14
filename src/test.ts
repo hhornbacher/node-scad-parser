@@ -1,19 +1,18 @@
-const expect = require('expect.js'),
-  Random = require('random-js');
+import * as expect from 'expect.js';
+import * as _ from 'lodash';
+import * as Random from 'random-js';
 
-const SCADParser = require('../src');
+import { FunctionNode, ModuleNode, IncludeNode, UseNode, CommentNode, VariableNode, Value, SignedValue, NumberValue, VectorValue, RangeValue, BooleanValue, StringValue, ReferenceValue } from './ast/index';
+import SCADParser from './index';
+
+declare const describe: (text: string, callback: () => void) => void;
+declare const it: (text: string, callback: () => void) => void;
+type TestCallback = (root) => void;
 
 const parser = new SCADParser();
 
 const randEngine = Random.engines.nativeMath;
 
-
-const miscExpressions = [
-  'a*b',
-  '4.77/c',
-  '1+(2-(3+(4-5)+6)-7)',
-  '( -a * z) +3'
-];
 
 const miscStatements = [
   'color("blue") cube([1,2,3]);',
@@ -35,7 +34,7 @@ const rand = {
     const name = rand.string('_abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ', rand.integer(3, 9))
     return prefix + name;
   },
-  statement: (count = null) => {
+  statement: (count: number | null = null) => {
     if (!_.isNumber(count))
       return rand.pick(miscStatements);
     return _.times(count, () => rand.statement());
@@ -44,7 +43,7 @@ const rand = {
     return `[${_.times(rand.integer(3, 10), () => rand.value(true)).join(', ')}]`;
   },
   value: (noVect = false) => {
-    let value = 1;
+    let value: any = 1;
     let mod = 5;
     if (noVect)
       mod = 4;
@@ -85,7 +84,7 @@ describe('SCADParser', function () {
   });
 
   describe('parseAST', function () {
-    const statementTest = (statement, file, expected, furtherTests = (root) => { }) => {
+    const statementTest = (statement, file, expected, furtherTests: TestCallback = () => { }) => {
 
       function truncateStatement(statement = '', max = 64) {
         const placeholder = '...';
@@ -106,10 +105,10 @@ describe('SCADParser', function () {
     };
 
     describe('with variable statements as input', function () {
-      const variableTest = (value = 1, varType = NumberValue, furtherTests = (value) => { }) => {
+      const variableTest = (value: any = 1, varType: any = Value, furtherTests: TestCallback = () => { }) => {
         const name = rand.identifier();
         const statement = `${name} = ${value};`;
-        const file = `var-${name}-${varType.name}.scad`;
+        const file = `var-${name}-${varType.prototype.className}.scad`;
         statementTest(statement, file, VariableNode, root => {
           expect(root.children[0].value).to.be.a(varType);
 
@@ -117,11 +116,11 @@ describe('SCADParser', function () {
             varType !== VectorValue &&
             varType !== RangeValue
           ) {
-            let cleanValue = value.toString().replace('-', '').replace(/"([^"]*)"/, '$1');
+            let cleanValue: any = value.toString().replace('-', '').replace(/"([^"]*)"/, '$1');
             if (varType === BooleanValue)
               cleanValue = cleanValue === 'true' ? true : false;
             const expectedValue = new varType([], cleanValue);
-            if (value < 0)
+            if (value < 0 && expectedValue instanceof SignedValue)
               expectedValue.setNegative(true);
             expect(root.children[0].value.isEqual(expectedValue)).to.equal(true);
           }
@@ -152,7 +151,7 @@ describe('SCADParser', function () {
         const vector = `[${vectorValues.join(', ')}]`;
         variableTest(vector, VectorValue, (value) => {
           expect(value.value).to.have.length(vectorValues.length);
-          let expected = new VectorValue([], _.map(vectorValues, (expected, index) => {
+          let expected = new VectorValue([], _.map(vectorValues, (expected) => {
             const expectedValue = new NumberValue([], expected.toString().replace('-', ''));
             if (expected < 0)
               expectedValue.setNegative(true);
@@ -164,7 +163,7 @@ describe('SCADParser', function () {
 
       for (let i = 0; i < 5; i++) {
         const range = `[${_.times(rand.integer(2, 3), () => rand.integer(-10e6, 10e6)).join(':')}]`;
-        variableTest(range, RangeValue, (value) => {
+        variableTest(range, RangeValue, () => {
           /** @todo Check values */
         });
       }
@@ -218,7 +217,7 @@ describe('SCADParser', function () {
       const functionTest = () => {
         const funcExpression = rand.expression();
         let functionStatement = `function ${rand.identifier()}() = ${funcExpression};`;
-        statementTest(functionStatement, 'module.scad', FunctionNode, root => {
+        statementTest(functionStatement, 'module.scad', FunctionNode, () => {
         });
       };
 
@@ -230,7 +229,7 @@ describe('SCADParser', function () {
 
   describe('Exceptions', function () {
     it('should throw an error, if neither code or file are passed to parseAST', function () {
-      expect(parser.parseAST).to.throwException(/You have to pass either code or file parameter!/);
+      expect(parser.parseAST).to.throwException(/path must be a string or Buffer/);
     });
 
     it('should throw a lexer error on "&%!" as invalid code', function () {
