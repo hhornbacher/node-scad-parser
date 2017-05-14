@@ -10,7 +10,7 @@ import { Token } from '../nearley/tokens';
  * Base value class
  * 
  */
-export class Value implements Value {
+export class Value {
     tokens: Array<Token>;
     value: any;
     className: string;
