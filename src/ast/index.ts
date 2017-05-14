@@ -1,9 +1,11 @@
 /**
  * Abstract syntax representation of the scad language
- * @module ast
+ *
  */
-import * as _ from 'lodash';
-import {inspect} from 'util';
+/*import * as _ from 'lodash';
+import { inspect } from 'util';*/
+
+import { Token } from '../nearley/tokens';
 
 export * from './values';
 export * from './nodes';
@@ -11,19 +13,19 @@ export * from './nodes';
 /**
  * Location in the code
  * 
- * @class Location
+ *
  * 
- * @param {Token} token The token from which to get the positional information
+ *
  */
 export class Location {
-    offset: Number;
-    size: Number;
-    lineBreaks: Number;
-    line: Number;
-    column: Number;
+    offset: number;
+    size: number;
+    lineBreaks: number;
+    line: number;
+    column: number;
 
-    constructor(token = { offset:0, size:0, lineBreaks:0, line:1, col:1 }) {
-        let { offset, size, lineBreaks, line, col } = token;
+    constructor(token: Token) {
+        let { offset, size, lineBreaks, line, col } = token || { offset: 0, size: 0, lineBreaks: 0, line: 1, col: 1 };
         this.offset = offset;
         this.size = size;
         this.lineBreaks = lineBreaks;
