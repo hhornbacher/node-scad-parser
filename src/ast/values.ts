@@ -19,7 +19,7 @@ export class Value {
         this.tokens = tokens;
         this.value = value;
         let instance: any = this.constructor;
-        this.value = instance.name;
+        this.className = instance.name;
     }
 
     /**
@@ -91,6 +91,9 @@ export class SignedValue extends Value {
  * 
  */
 export class NumberValue extends SignedValue {
+    constructor(tokens: Array<Token>, value: number) {
+        super(tokens, value);
+    }
 }
 
 
@@ -99,6 +102,9 @@ export class NumberValue extends SignedValue {
  * 
  */
 export class BooleanValue extends Value {
+    constructor(tokens: Array<Token>, value: boolean) {
+        super(tokens, value);
+    }
 }
 
 
@@ -107,6 +113,10 @@ export class BooleanValue extends Value {
  * 
  */
 export class StringValue extends Value {
+    constructor(tokens: Array<Token>, value: string) {
+        super(tokens, value);
+    }
+
     toCode() {
         return `"${this.value}"`;
     }
@@ -118,6 +128,10 @@ export class StringValue extends Value {
  * 
  */
 export class VectorValue extends Value {
+    constructor(tokens: Array<Token>, value: Array<any>) {
+        super(tokens, value);
+    }
+
     /**
      * Check if values are equal
      * 
@@ -155,7 +169,7 @@ export class RangeValue extends Value {
     end: Value;
     increment: Value;
 
-    constructor(tokens: Array<Token>, start: Value, end: Value, increment = new NumberValue([], 1)) {
+    constructor(tokens: Array<Token>, start: Value, end: Value, increment: Value = new NumberValue([], 1)) {
         super(tokens, null);
         this.start = start;
         this.end = end;
