@@ -71,3 +71,4 @@ typings/
 profile-*
 docs
 lib
+grammar.ts
