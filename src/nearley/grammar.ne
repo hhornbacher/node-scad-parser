@@ -1,5 +1,4 @@
 @preprocessor typescript
-
 @{% 
 	
 /**
@@ -7,10 +6,57 @@
  * @module nearley/grammar
  */
 
-require('./tokens')();
-require('../ast');
+import * as _ from 'lodash';
+import { tokenRules } from './tokens';
+import {
+    CommentNode,
+    IncludeNode,
+    UseNode,
+    ModuleNode,
+    FunctionNode,
+    VariableNode,
+    ActionNode,
+    ExpressionNode,
+	ParameterNode,
+	ArgumentNode,
+	BooleanValue,
+	ReferenceValue,
+	NumberValue,
+	StringValue,
+	RangeValue,
+	VectorValue
+} from '../ast';
 
-const pickTokens = (match) => _.filter(match, token => {
+
+const {
+    include,
+    use,
+    moduleDefinition,
+    functionDefinition,
+    actionCall,
+    comment,
+    mlComment,
+    comma,
+    seperator,
+    lvect,
+    rvect,
+    lparent,
+    rparent,
+    lblock,
+    rblock,
+	bool_true,
+	bool_false,
+    operator1,
+    operator2,
+    operator3,
+    assign,
+    identifier,
+    string,
+    float,
+    eos
+} = tokenRules;
+
+const pickTokens = (match: Array<any>) => _.filter(match, (token: any) => {
 	if(token.constructor.name === 'Object')
 		return true;
 	return false;
@@ -20,7 +66,7 @@ const pickTokens = (match) => _.filter(match, token => {
 
 Block -> 
 	Statement
-	| Block Statement {% d => _.concat(d[0], d[1]) %}
+	| Block Statement {% d => _.concat(d[0], d[1]) %}  
 
 
 Statement -> 
@@ -28,9 +74,9 @@ Statement ->
 	| %mlComment {% d => new CommentNode(pickTokens(d), d[0].value, true) %}
 	| %include %eos {% d => new IncludeNode(pickTokens(d), d[0].value) %}
 	| %use %eos {% d => new UseNode(pickTokens(d), d[0].value) %}
-	| %moduleDefinition %rparent %lblock Block %rblock {% d => new ModuleNode(pickTokens(d), d[0].value, null, d[3]) %}
+	| %moduleDefinition %rparent %lblock Block %rblock {% d => new ModuleNode(pickTokens(d), d[0].value, [], d[3]) %}
 	| %moduleDefinition Parameters %rparent %lblock Block %rblock {% d => new ModuleNode(pickTokens(d), d[0].value, d[1], d[4]) %}
-	| %functionDefinition %rparent %assign Expression %eos {% d => new FunctionNode(pickTokens(d), d[0].value, null, d[3]) %}
+	| %functionDefinition %rparent %assign Expression %eos {% d => new FunctionNode(pickTokens(d), d[0].value, [], d[3]) %}
 	| %functionDefinition Parameters %rparent %assign Expression %eos {% d => new FunctionNode(pickTokens(d), d[0].value, d[1], d[4]) %}
 	| %identifier %assign Expression %eos {% d => new VariableNode(pickTokens(d), d[0].value, d[2]) %}
 	| ModuleInstantiation {% id %}
@@ -79,7 +125,6 @@ Parameters ->
 Parameter ->
 	%identifier {% d => new ParameterNode(pickTokens(d), d[0].value) %}
 	| %identifier %assign Expression {% d => new ParameterNode(pickTokens(d), d[0].value, d[2]) %}
-
 
 
 VectorExpression ->
