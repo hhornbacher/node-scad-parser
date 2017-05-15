@@ -1,7 +1,7 @@
 #!/usr/bin/node
 
-const SCADParser = require('./index'),
-    path = require('path');
+import SCADParser from './index';
+import * as path from 'path';
 
 
 const parser = new SCADParser();
