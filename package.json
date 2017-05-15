@@ -21,7 +21,7 @@
     "bluebird": "^3.5.0",
     "lodash": "^4.17.4",
     "moo": "^0.3.2",
-    "nearley": "hhornbacher/nearley#dfe65a82a9f6f1e28978f8fac63cfb86baf523c2",
+    "nearley": "hhornbacher/nearley#2736264b8e9c4b40a2bfff5176037d9ee3c337de",
     "tree-morph": "^0.2.1"
   },
   "devDependencies": {
