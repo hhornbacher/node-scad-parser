@@ -83,12 +83,9 @@ Statement ->
 
 
 ModuleInstantiation ->
-	SingleModuleInstantiation ChildrenInstantiation {% d => d[0].setChildren(d[1]) %}
-	| SingleModuleInstantiation %eos {% id %}
-
-ChildrenInstantiation ->
-	%lblock Block %rblock {% d => d[1] %}
-	| ModuleInstantiation
+	SingleModuleInstantiation %eos {% id %}
+	| SingleModuleInstantiation %lblock Block %rblock {% d => d[0].setChildren(d[2]) %}
+	| SingleModuleInstantiation ModuleInstantiation {% d => d[0].setChildren([d[1]]) %}
 
 SingleModuleInstantiation ->
 	%actionCall %rparent  {% d => new ActionNode(pickTokens(d), d[0].value) %} 

@@ -136,7 +136,8 @@ export class Node implements TreeNode {
      * 
      */
     indentToString(count: number) {
-        return _.times(count * 2, () => ' ').join('');
+
+        return _.join(_.times(count * 2, () => ' '), '');
     }
 
     /**
@@ -146,7 +147,7 @@ export class Node implements TreeNode {
     childrenToString(indent: number, children: Array<Node>) {
         if (children.length > 0)
             return '\n'
-                + _.map(children, child => child.toString(indent + 1) + '\n').join('')
+                + _.join(_.map(children, child => child.toString(indent + 1) + '\n'), '')
                 + this.indentToString(indent);
         return null;
     }
@@ -156,7 +157,7 @@ export class Node implements TreeNode {
      * 
      */
     paramsToString(params: {}) {
-        return _.map(params, (val, name) => val !== null ? ' ' + name + '="' + val + '"' : '').join('');
+        return _.join(_.map(params, (val, name) => val !== null ? ' ' + name + '="' + val.toString() + '"' : ''), '');
     }
 
     /**
@@ -173,13 +174,12 @@ export class Node implements TreeNode {
     childrenToCode(indent: number, children: Array<Node>) {
         if (children.length > 0)
             return '\n'
-                + _.map(children, child => child.toCode(indent + 1) + '\n').join('')
+                + _.join(_.map(children, child => child.toCode(indent + 1) + '\n'), '')
                 + this.indentToString(indent);
         return '';
     }
 
     toCode(indent: number, params?: {}, children: Array<Node> = []) {
-        console.log(params);
         return `${this.indentToString(indent)}${this.childrenToCode(indent, children)}`;
     }
 }
@@ -206,7 +206,7 @@ export class ParentNode extends Node {
         this.children = [];
         _.each(children, (child: any) => {
             this.children.push(child);
-            child.parent = this;
+            //child.parent = this;
         });
         return this;
     }
@@ -264,7 +264,7 @@ export class CommentNode extends Node {
 
     toCode(indent: number = 0) {
         if (this.multiline)
-            return `${this.indentToString(indent)}/* ${_.map(this.text.split('\n'), line => line.trim()).join(`\n${this.indentToString(indent)}`)} */`;
+            return `${this.indentToString(indent)}/* ${_.join(_.map(this.text.split('\n'), line => line.trim()), `\n${this.indentToString(indent)}`)} */`;
         return `${this.indentToString(indent)}// ${this.text}`;
     }
 }
@@ -276,9 +276,9 @@ export class CommentNode extends Node {
  */
 export class VariableNode extends Node {
     name: string;
-    value: Value | null;
+    value: Value;
 
-    constructor(tokens: Array<Token>, name: string, value: Value | null = null) {
+    constructor(tokens: Array<Token>, name: string, value: Value) {
         super(tokens);
         this.name = name;
         this.value = value;
@@ -309,7 +309,7 @@ export class VariableNode extends Node {
     }
 
     toCode(indent: number = 0) {
-        return `${this.indentToString(indent)}${this.name} = ${(this.value as Value).toCode()};`;
+        return `${this.indentToString(indent)}${this.name} = ${this.value.toCode()};`;
     }
 }
 
@@ -318,9 +318,14 @@ export class VariableNode extends Node {
  * Parameter definition
  * 
  */
-export class ParameterNode extends VariableNode {
+export class ParameterNode extends Node {
+    name: string;
+    value: Value | null;
+
     constructor(tokens: Array<Token>, name: string, value: Value | null = null) {
-        super(tokens, name, value);
+        super(tokens);
+        this.name = name;
+        this.value = value;
     }
 
     toString() {
@@ -444,15 +449,16 @@ export class ForLoopNode extends ParentNode {
  * Action call statement
  * 
  */
-export class ActionNode extends Node {
+export class ActionNode extends ParentNode {
     modifier: string;
     args: Array<ArgumentNode>;
 
     constructor(tokens: Array<any>, name: string, args: Array<ArgumentNode> = []) {
-        super(tokens, name.replace(/([!#\*\%]?)(.*)/, '$2'));
+        super([], tokens, name.replace(/([!#\*\%]?)(.*)/, '$2'));
         this.modifier = name.replace(/([!#\*\%]?)(.*)/, '$1') || '';
         this.args = args;
     }
+
 
     /**
      * Get string representation of this node
@@ -462,7 +468,7 @@ export class ActionNode extends Node {
         return super.toString(indent, {
             name: this.name,
             modifier: this.modifier,
-            args: this.args.join(', ')
+            args: _.join(this.args, ', ')
         });
     }
 

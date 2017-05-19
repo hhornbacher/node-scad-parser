@@ -5,6 +5,7 @@
 import * as _ from 'lodash';
 import { Token } from '../nearley/tokens';
 
+export type ValueType = number | string | boolean | Array<Value>;
 
 /**
  * Base value class
@@ -12,14 +13,12 @@ import { Token } from '../nearley/tokens';
  */
 export class Value {
     tokens: Array<Token>;
-    value: any;
+    value: ValueType;
     className: string;
 
-    constructor(tokens: Array<Token>, value: any) {
+    constructor(tokens: Array<Token>, value: ValueType) {
         this.tokens = tokens;
         this.value = value;
-        let instance: any = this.constructor;
-        this.className = instance.name;
     }
 
     /**
@@ -52,13 +51,10 @@ export class Value {
 }
 
 export class SignedValue extends Value {
-    negative: Boolean = false;
+    negative: boolean = false;
 
-    constructor(tokens: Array<Token>, value: any) {
+    constructor(tokens: Array<Token>, value: ValueType) {
         super(tokens, value);
-
-        let instance: any = this.constructor;
-        this.value = instance.name;
     }
 
     /**
@@ -67,7 +63,7 @@ export class SignedValue extends Value {
      *
      *
      */
-    setNegative(negative: Boolean) {
+    setNegative(negative: boolean) {
         this.negative = negative;
         return this;
     }
@@ -93,6 +89,8 @@ export class SignedValue extends Value {
 export class NumberValue extends SignedValue {
     constructor(tokens: Array<Token>, value: number) {
         super(tokens, value);
+        let instance: any = this.constructor;
+        this.className = instance.name;
     }
 }
 
@@ -104,6 +102,8 @@ export class NumberValue extends SignedValue {
 export class BooleanValue extends Value {
     constructor(tokens: Array<Token>, value: boolean) {
         super(tokens, value);
+        let instance: any = this.constructor;
+        this.className = instance.name;
     }
 }
 
@@ -115,6 +115,8 @@ export class BooleanValue extends Value {
 export class StringValue extends Value {
     constructor(tokens: Array<Token>, value: string) {
         super(tokens, value);
+        let instance: any = this.constructor;
+        this.className = instance.name;
     }
 
     toCode() {
@@ -128,8 +130,10 @@ export class StringValue extends Value {
  * 
  */
 export class VectorValue extends Value {
-    constructor(tokens: Array<Token>, value: Array<any>) {
+    constructor(tokens: Array<Token>, value: Array<Value>) {
         super(tokens, value);
+        let instance: any = this.constructor;
+        this.className = instance.name;
     }
 
     /**
@@ -139,7 +143,7 @@ export class VectorValue extends Value {
     isEqual(value: Value) {
         let out = false;
         if (value instanceof VectorValue) {
-            out = this.value.length > 0;
+            out = (this.value as Array<Value>).length > 0;
             _.each(this.value, (val, key) => {
                 if (!val.isEqual(value.value[key])) {
                     out = false;
@@ -151,11 +155,11 @@ export class VectorValue extends Value {
     }
 
     toString() {
-        return `[${_.map(this.value, (value: Value) => value.toString()).join(', ')}]`;
+        return `[${_.map((this.value as Array<Value>), (value: Value) => value).join(', ')}]`;
     }
 
     toCode() {
-        return `[${_.map(this.value, (value: Value) => value.toCode()).join(', ')}]`;
+        return `[${_.map((this.value as Array<Value>), (value: Value) => value).join(', ')}]`;
     }
 }
 
@@ -170,10 +174,12 @@ export class RangeValue extends Value {
     increment: Value;
 
     constructor(tokens: Array<Token>, start: Value, end: Value, increment: Value = new NumberValue([], 1)) {
-        super(tokens, null);
+        super(tokens, [start, increment, end]);
         this.start = start;
         this.end = end;
         this.increment = increment;
+        let instance: any = this.constructor;
+        this.className = instance.name;
     }
 
     /**
@@ -206,11 +212,10 @@ export class RangeValue extends Value {
  * 
  */
 export class ReferenceValue extends SignedValue {
-    reference: string;
-
     constructor(tokens: Array<Token>, reference: string) {
-        super(tokens, null);
-        this.reference = reference;
+        super(tokens, reference);
+        let instance: any = this.constructor;
+        this.className = instance.name;
     }
 
     /**
@@ -221,21 +226,9 @@ export class ReferenceValue extends SignedValue {
         if (
             value instanceof ReferenceValue
             && this.negative === value.negative
-            && this.reference === value.reference
+            && this.value === value.value
         )
             return true;
         return false;
-    }
-
-    /**
-     * Get the string representation of this object
-     * 
-     */
-    toString() {
-        return `${this.negative ? '-' : ''}${this.reference}`;
-    }
-
-    toCode() {
-        return `${this.negative ? '-' : ''}${this.reference}`;
     }
 }
