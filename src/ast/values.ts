@@ -155,11 +155,11 @@ export class VectorValue extends Value {
     }
 
     toString() {
-        return `[${_.map((this.value as Array<Value>), (value: Value) => value).join(', ')}]`;
+        return `[${_.map((this.value as Array<Value>), (value: any) => value.toString()).join(', ')}]`;
     }
 
     toCode() {
-        return `[${_.map((this.value as Array<Value>), (value: Value) => value).join(', ')}]`;
+        return `[${_.map(this.value as any, (value: any) => value.toString()).join(', ')}]`;
     }
 }
 

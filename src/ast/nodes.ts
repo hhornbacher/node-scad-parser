@@ -179,7 +179,7 @@ export class Node implements TreeNode {
         return '';
     }
 
-    toCode(indent: number, params?: {}, children: Array<Node> = []) {
+    toCode(indent: number, /*params?: {},*/ children: Array<Node> = []) {
         return `${this.indentToString(indent)}${this.childrenToCode(indent, children)}`;
     }
 }
@@ -219,8 +219,8 @@ export class ParentNode extends Node {
         return super.toString(indent, params, this.children)
     }
 
-    toCode(indent: number = -1, params?: {}) {
-        return super.toCode(indent, params, this.children)
+    toCode(indent: number = -1/*, params?: {}*/) {
+        return super.toCode(indent, /*params,*/ this.children)
     }
 }
 
