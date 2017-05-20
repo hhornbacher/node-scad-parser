@@ -70,5 +70,4 @@ typings/
 # Own rules
 profile-*
 docs
-lib
 grammar.ts

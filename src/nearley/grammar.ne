@@ -66,7 +66,7 @@ const pickTokens = (match: Array<any>) => _.filter(match, (token: any) => {
 
 Block -> 
 	Statement
-	| Block Statement {% d => _.concat(d[0], d[1]) %}  
+	| Block Statement {% d => _.concat(d[0], d[1]) %}   
 
 
 Statement -> 
