@@ -16,6 +16,7 @@ const randEngine = Random.engines.nativeMath;
 
 const miscStatements = [
   'color("blue") cube([1,2,3]);',
+  'color("red") cube([5,6,7]) { x=3; echo("Hallo"); }',
   'action(a,b,c);',
   'variable=ref*3+x*x;'
 ];
@@ -202,7 +203,7 @@ describe('SCADParser', function () {
     describe('with module statements as input', function () {
       const moduleTest = (statementCount) => {
         const modStatements = rand.statement(statementCount);
-        let moduleStatement = `module ${rand.identifier()}() { ${modStatements.join('\n')} }`;
+        let moduleStatement = `module ${rand.identifier()}() {\n${modStatements.join('\n')} }`;
         statementTest(moduleStatement, 'module.scad', ModuleNode, root => {
           expect(root.children[0].children).to.have.length(modStatements.length);
         });
