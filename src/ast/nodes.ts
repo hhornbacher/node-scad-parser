@@ -2,7 +2,7 @@
  * Abstract nodes of the scad language
  */
 import * as _ from 'lodash';
-import morph from 'tree-morph';
+import * as morph from 'tree-morph';
 import { Token } from '../nearley/tokens';
 import { Value } from './values';
 
