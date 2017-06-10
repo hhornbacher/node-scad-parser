@@ -5,8 +5,8 @@ import * as path from 'path';
 import * as childProcess from 'child_process';
 import * as moo from 'moo';
 import * as nearley from 'nearley';
-import { grammar } from './nearley/grammar';
-import { tokens } from './nearley/tokens';
+import { ParserRules, ParserStart } from './nearley/grammar';
+import { Token, tokens } from './nearley/tokens';
 import {
   RootNode,
   Location
@@ -15,15 +15,13 @@ import {
 /**
  * Parser for OpenSCAD code
  * 
- *
- * 
  */
 export default class SCADParser {
   private ignoredTokens: Array<string>;
   private results: Array<string>;
   private cache: Array<RootNode>;
   private codeCache: Array<string>;
-  private tokenCache: any;
+  private tokenCache: Array<Array<Token>>;
   private lexer: any;
 
   constructor() {
@@ -38,14 +36,11 @@ export default class SCADParser {
   /**
    * Parse the supplied code
    * 
-   *
-   *
-   *
    */
-  parse(code: string, file: string) {
+  parse(code: string, file: string): RootNode {
     this.tokenCache[file] = [];
     try {
-      const parser = new nearley.Parser(grammar.ParserRules, grammar.ParserStart);
+      const parser = new nearley.Parser(ParserRules, ParserStart);
       let token;
 
       // Feed whole code to lexer
@@ -96,16 +91,12 @@ export default class SCADParser {
   /**
    * Render the supplied code (with OpenSCAD)
    * 
-   *
-   *
-   *
-   *
    */
-  render(code: string, file: string, options: any) {
+  render(code: string, file: string, options: any): Promise<{}> {
     const writeFile: (file: string, enc: string) => Promise<{}> = Promise.promisify(fs.writeFile);
-    const exec = Promise.promisify(childProcess.exec);
+    const exec: (command: string) => Promise<{}> = Promise.promisify(childProcess.exec);
 
-    const render = (options: any) => {
+    const execRenderer = (options: any) => {
       return exec(
         options.binaryPath
         + ' -o ' + options.outputFile
@@ -121,27 +112,24 @@ export default class SCADParser {
     }, options);
     if (!code && file) {
       _options.inputFile = file;
-      return render(_options);
+      return execRenderer(_options);
     }
     else if (code) {
       let tmpFile = '/tmp/' + (path.basename(file) || 'scad-parser_tmp.scad');
       return writeFile(tmpFile, 'utf8')
         .then(() => {
           _options.inputFile = tmpFile;
-          return render(_options);
+          return execRenderer(_options);
         });
-
     }
+    throw new Error('Neither code or file supplied!');
   }
 
   /**
    * Parse the abstract syntax tree
    * 
-   *
-   *
-   *
    */
-  parseAST(file: string, code: string = '') {
+  parseAST(file: string, code: string = ''): RootNode {
     if (code !== '') {
       this.codeCache[file] = code;
       this.cache[file] = this.parse(code, file);
@@ -151,11 +139,12 @@ export default class SCADParser {
       this.codeCache[file] = code;
       this.cache[file] = this.parse(code, file);
     }
-
-    return this.cache[file];
+    if (this.cache[file])
+      return this.cache[file];
+    throw new Error('Neither code or file supplied!');
   }
 
-  findTokens(value: string = '', type: string = '', file) {
+  findTokens(value: string = '', type: string = '', file): Array<Token> {
     let find: { value?: string, type?: string } = {};
     if (value !== '')
       find.value = value;
@@ -164,9 +153,9 @@ export default class SCADParser {
     return _.filter(this.tokenCache[file], find);
   }
 
-  getToken(column: number, line: number, file: string) {
-    let out = null;
-    _.each(this.tokenCache[file], token => {
+  getToken(column: number, line: number, file: string): Token | null {
+    let out: Token | null = null;
+    _.each(this.tokenCache[file], (token: Token) => {
       if (
         line == token.line &&
         (column >= token.col && column < (token.col + token.size))
@@ -181,14 +170,8 @@ export default class SCADParser {
   /**
    * Get an except of the code file
    * 
-   *
-   *
-   *
-   *
-   * 
-   *
    */
-  getCodeExcerpt(file: string, location: Location, lines = 3) {
+  getCodeExcerpt(file: string, location: Location, lines = 3): string {
     let code = this.codeCache[file].split('\n');
 
     let start = location.line - (lines + 2);

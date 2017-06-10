@@ -21,21 +21,21 @@
     "bluebird": "^3.5.0",
     "lodash": "^4.17.4",
     "moo": "^0.3.2",
-    "nearley": "hhornbacher/nearley#2736264b8e9c4b40a2bfff5176037d9ee3c337de",
+    "nearley": "^2.10.0",
     "tree-morph": "^0.2.1"
   },
   "devDependencies": {
-    "@types/bluebird": "^3.5.3",
-    "@types/lodash": "^4.14.64",
-    "@types/node": "^7.0.18",
+    "@types/bluebird": "^3.5.5",
+    "@types/lodash": "^4.14.65",
+    "@types/node": "^7.0.29",
     "expect.js": "^0.3.1",
     "istanbul": "^0.4.5",
-    "mocha": "^3.3.0",
+    "mocha": "^3.4.2",
     "nodemon": "^1.11.0",
     "random-js": "^1.0.8",
-    "ts-node": "^3.0.4",
-    "typedoc": "^0.7.0",
-    "typescript": "^2.3.2"
+    "ts-node": "^3.0.6",
+    "typedoc": "^0.7.1",
+    "typescript": "^2.3.4"
   },
   "homepage": "https://github.com/hhornbacher/node-scad-parser#readme",
   "repository": {

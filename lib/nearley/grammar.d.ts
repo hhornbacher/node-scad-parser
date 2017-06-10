@@ -1,19 +1,13 @@
-export declare type Info = any;
 export interface Token {
     value: any;
     [key: string]: any;
 }
 export interface Lexer {
-    reset: (chunk: string, info: Info) => void;
-    next: () => Token;
-    save: () => Info;
+    reset: (chunk: string, info: any) => void;
+    next: () => Token | undefined;
+    save: () => any;
     formatError: (token: Token) => string;
     has: (tokenType: string) => boolean;
-}
-export interface NearleyGrammar {
-    ParserRules: NearleyRule[];
-    ParserStart: string;
-    Lexer: Lexer | undefined;
 }
 export interface NearleyRule {
     name: string;
@@ -25,4 +19,6 @@ export declare type NearleySymbol = string | {
 } | {
     test: (token: any) => boolean;
 };
-export declare var grammar: NearleyGrammar;
+export declare var Lexer: Lexer | undefined;
+export declare var ParserRules: NearleyRule[];
+export declare var ParserStart: string;
