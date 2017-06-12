@@ -1,6 +1,6 @@
 {
   "name": "scad-parser",
-  "version": "1.0.16",
+  "version": "1.0.17",
   "description": "Module to parse the abstract syntax tree of OpenSCAD files",
   "author": "Harry Hornbacher <harry@harry-hornbacher.de>",
   "license": "Apache-2.0",
