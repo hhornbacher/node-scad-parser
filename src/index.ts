@@ -1,16 +1,21 @@
-import * as _ from 'lodash';
-import * as Promise from 'bluebird';
 import * as fs from 'fs';
-import * as path from 'path';
-import * as childProcess from 'child_process';
+import * as repl from 'repl';
+import * as _ from 'lodash';
 import * as moo from 'moo';
 import * as nearley from 'nearley';
-import { ParserRules, ParserStart } from './nearley/grammar';
-import { Token, tokens } from './nearley/tokens';
+import {
+  ParserRules,
+  ParserStart
+} from './nearley/grammar';
+import {
+  Token,
+  tokens
+} from './nearley/tokens';
 import {
   RootNode,
   Location
 } from './ast';
+import * as util from './util';
 
 /**
  * Parser for OpenSCAD code
@@ -31,6 +36,33 @@ export default class SCADParser {
     this.codeCache = [];
     this.tokenCache = [];
     this.lexer = moo.compile(tokens);
+    util.tmpSetGracefulCleanup();
+  }
+
+  static repl(context: { [key: string]: any } = {}) {
+    const parser = new SCADParser();
+    const _context = {
+      ...context,
+      parser,
+      testRender: () => parser.render(null, '/home/harry/Dokumente/Development/Private/3D/thermostirrer/coil-holder.scad').then(out => console.log(out))
+    };
+
+    console.log(
+      'Started in REPL-mode\n' +
+      'Locally defined variables:\n' +
+      _.map(_context, (val, key) => `var ${key} = ${val.toString()}`).join('\n')
+    );
+    const r = repl.start({
+      prompt: '> ',
+      useColors: true
+    });
+    _.each(_context, (value: any, key: string) => {
+      Object.defineProperty((r as { [key: string]: any }).context, key, {
+        configurable: false,
+        enumerable: true,
+        value
+      });
+    });
   }
 
   /**
@@ -92,36 +124,57 @@ export default class SCADParser {
    * Render the supplied code (with OpenSCAD)
    * 
    */
-  render(code: string, file: string, options: any): Promise<{}> {
-    const writeFile: (file: string, enc: string) => Promise<{}> = Promise.promisify(fs.writeFile);
-    const exec: (command: string) => Promise<{}> = Promise.promisify(childProcess.exec);
+  render(code: string | null, file: string | null, options: any = {}): Promise<string> {
 
-    const execRenderer = (options: any) => {
-      return exec(
-        options.binaryPath
-        + ' -o ' + options.outputFile
-        + ' --colorscheme=' + options.colorScheme
-        + ' ' + options.inputFile
-      );
+    const execRenderer = (options: { [key: string]: any }) => {
+      return util.tmpName({
+        postfix: '.stl'
+      })
+        .then(path => {
+          const args = ` -o ${path}`
+            + (options.colorScheme ? ' --colorscheme=' + options.colorScheme : '')
+            + ' ' + options.inputFile;
+          return util.exec(
+            options.binaryPath
+            + args
+          )
+            .then(() => util.readFile(path, 'utf8'));
+        });
     };
 
-    let _options = _.merge({
+    let _options = {
       binaryPath: '/usr/bin/openscad',
       viewAll: true,
-      autoCenter: true
-    }, options);
-    if (!code && file) {
-      _options.inputFile = file;
-      return execRenderer(_options);
-    }
-    else if (code) {
-      let tmpFile = '/tmp/' + (path.basename(file) || 'scad-parser_tmp.scad');
-      return writeFile(tmpFile, 'utf8')
-        .then(() => {
-          _options.inputFile = tmpFile;
-          return execRenderer(_options);
+      autoCenter: true,
+      ...options
+    };
+
+    if (file) {
+      return execRenderer({
+        ..._options,
+        inputFile: file
+      })
+        .catch(err => {
+          console.log(err);
         });
     }
+    else if (code) {
+      return util.tmpName({
+        postfix: '.scad'
+      }).then(path => {
+        return util.writeFile(path, code)
+          .then(() => {
+            return execRenderer({
+              ..._options,
+              inputFile: path
+            })
+              .catch(err => {
+                console.log(err);
+              });
+          });
+      });
+    }
+
     throw new Error('Neither code or file supplied!');
   }
 
@@ -198,4 +251,8 @@ export default class SCADParser {
         return `${pad(index + start + 1, end.toString().length)}: ${line}\n${drawMarker(end.toString().length)}`;
     }).join('\n');
   }
+}
+
+if (require.main === module) {
+  SCADParser.repl();
 }

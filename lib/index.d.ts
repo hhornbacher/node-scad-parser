@@ -1,5 +1,3 @@
-/// <reference types="bluebird" />
-import * as Promise from 'bluebird';
 import { Token } from './nearley/tokens';
 import { RootNode, Location } from './ast';
 /**
@@ -14,6 +12,9 @@ export default class SCADParser {
     private tokenCache;
     private lexer;
     constructor();
+    static repl(context?: {
+        [key: string]: any;
+    }): void;
     /**
      * Parse the supplied code
      *
@@ -23,7 +24,7 @@ export default class SCADParser {
      * Render the supplied code (with OpenSCAD)
      *
      */
-    render(code: string, file: string, options: any): Promise<{}>;
+    render(code: string | null, file: string | null, options?: any): Promise<string>;
     /**
      * Parse the abstract syntax tree
      *
