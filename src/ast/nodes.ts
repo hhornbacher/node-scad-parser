@@ -4,7 +4,7 @@
 import * as _ from 'lodash';
 import * as morph from 'tree-morph';
 import { Token } from '../nearley/tokens';
-import { Value } from './values';
+import { GenericValue } from './values';
 
 export interface Context {
     skip(): void;
@@ -54,7 +54,6 @@ export class Node implements TreeNode {
 
     /**
      * Find a node by it's token
-     * 
      */
     findByToken(token: Token): Node | null {
         return this.morph((node) => {
@@ -77,7 +76,6 @@ export class Node implements TreeNode {
 
     /**
      * Find a node by it's type (export class name without 'Node')
-     * 
      */
     findByType<T>(type: { new (): T }) {
         return this.morph((node) => {
@@ -93,7 +91,6 @@ export class Node implements TreeNode {
 
     /**
      * Find a node by it's name (variables,modules,functions,actions)
-     * 
      */
     findByName(name: string) {
         return this.morph((node) => {
@@ -112,9 +109,8 @@ export class Node implements TreeNode {
     /**
      * Find a node by it's value (looks in values)
      *
-     * 
      */
-    findByValue(value: Value) {
+    findByValue(value: GenericValue) {
         return this.morph((node) => {
             if (node instanceof VariableNode && node.value !== null && node.value.isEqual(value))
                 return node;
@@ -133,7 +129,6 @@ export class Node implements TreeNode {
 
     /**
      * Create a string with count whitespaces
-     * 
      */
     indentToString(count: number) {
 
@@ -142,7 +137,6 @@ export class Node implements TreeNode {
 
     /**
      * Get string representation of children
-     * 
      */
     childrenToString(indent: number, children: Array<Node>) {
         if (children.length > 0)
@@ -154,7 +148,6 @@ export class Node implements TreeNode {
 
     /**
      * Get string representation of params
-     * 
      */
     paramsToString(params: {}) {
         return _.join(_.map(params, (val, name) => val !== null ? ' ' + name + '="' + val.toString() + '"' : ''), '');
@@ -162,7 +155,6 @@ export class Node implements TreeNode {
 
     /**
      * Get string representation of this node
-     * 
      */
     toString(indent: number = 0, params: {} = {}, children: Array<Node> = []) {
         let childrenString = this.childrenToString(indent, children);
@@ -199,7 +191,6 @@ export class ParentNode extends Node {
 
     /**
      * Set the children of this node
-     * 
      */
     setChildren(children: Array<Node>) {
         children = _.filter(children, x => !!x);
@@ -213,7 +204,6 @@ export class ParentNode extends Node {
 
     /**
      * Get string representation of this node
-     * 
      */
     toString(indent: number, params?: {}) {
         return super.toString(indent, params, this.children)
@@ -253,7 +243,6 @@ export class CommentNode extends Node {
 
     /**
      * Get string representation of this node
-     * 
      */
     toString(indent: number = 0) {
         return super.toString(indent, {
@@ -276,9 +265,9 @@ export class CommentNode extends Node {
  */
 export class VariableNode extends Node {
     name: string;
-    value: Value;
+    value: GenericValue;
 
-    constructor(tokens: Array<Token>, name: string, value: Value) {
+    constructor(tokens: Array<Token>, name: string, value: GenericValue) {
         super(tokens);
         this.name = name;
         this.value = value;
@@ -286,7 +275,6 @@ export class VariableNode extends Node {
 
     /**
      * Find a node by it's token
-     * 
      */
     /*  findByToken(token: Token) {
           if (this.value !== null && _.isMatch(this.value.tokens, (t: Token) => token.toString() === t.toString()) && !(this.value instanceof ExpressionNode))
@@ -298,7 +286,6 @@ export class VariableNode extends Node {
 
     /**
      * Get string representation of this node
-     * 
      */
     toString(indent: number = 0) {
         return super.toString(indent, {
@@ -320,9 +307,9 @@ export class VariableNode extends Node {
  */
 export class ParameterNode extends Node {
     name: string;
-    value: Value | null;
+    value: GenericValue | null;
 
-    constructor(tokens: Array<Token>, name: string, value: Value | null = null) {
+    constructor(tokens: Array<Token>, name: string, value: GenericValue | null = null) {
         super(tokens);
         this.name = name;
         this.value = value;
@@ -347,7 +334,7 @@ export class ParameterNode extends Node {
  * 
  */
 export class ArgumentNode extends VariableNode {
-    constructor(tokens: Array<Token>, value: Value, name: string | null = null) {
+    constructor(tokens: Array<Token>, value: GenericValue, name: string | null = null) {
         super(tokens, name || '', value);
     }
 
@@ -379,7 +366,6 @@ export class IncludeNode extends Node {
 
     /**
      * Get string representation of this node
-     * 
      */
     toString(indent: number = 0) {
         return super.toString(indent, {
@@ -417,7 +403,6 @@ export class ModuleNode extends ParentNode {
 
     /**
      * Get string representation of this node
-     * 
      */
     toString(indent: number = 0) {
         return super.toString(indent, {
@@ -462,7 +447,6 @@ export class ActionNode extends ParentNode {
 
     /**
      * Get string representation of this node
-     * 
      */
     toString(indent: number = 0) {
         return super.toString(indent, {
@@ -484,8 +468,8 @@ export class ActionNode extends ParentNode {
  */
 export class FunctionNode extends Node {
     params: Array<ParameterNode>;
-    expression: ExpressionNode | Value;
-    constructor(tokens: Array<Token>, name: string, params: Array<ParameterNode>, expression: ExpressionNode | Value) {
+    expression: ExpressionNode | GenericValue;
+    constructor(tokens: Array<Token>, name: string, params: Array<ParameterNode>, expression: ExpressionNode | GenericValue) {
         super(tokens, name);
         this.params = params;
         this.expression = expression;
@@ -515,11 +499,11 @@ export class FunctionNode extends Node {
  * 
  */
 export class ExpressionNode extends Node {
-    leftExpression: ExpressionNode | Value;
-    rightExpression: ExpressionNode | Value | null;
+    leftExpression: ExpressionNode | GenericValue;
+    rightExpression: ExpressionNode | GenericValue | null;
     operator: string | null;
     negative: boolean;
-    constructor(tokens: Array<Token>, leftExpression: ExpressionNode | Value, rightExpression: ExpressionNode | Value | null = null, operator: string | null = null) {
+    constructor(tokens: Array<Token>, leftExpression: ExpressionNode | GenericValue, rightExpression: ExpressionNode | GenericValue | null = null, operator: string | null = null) {
         super(tokens);
 
         this.leftExpression = leftExpression;
@@ -537,7 +521,6 @@ export class ExpressionNode extends Node {
 
     /**
      * Turn this expression negative
-     * 
      */
     setNegative(neg) {
         this.negative = neg;

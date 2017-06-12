@@ -1,5 +1,5 @@
 import { Token } from '../nearley/tokens';
-import { Value } from './values';
+import { GenericValue } from './values';
 export interface Context {
     skip(): void;
     break(): void;
@@ -28,45 +28,37 @@ export declare class Node implements TreeNode {
     protected morph(dataMutator: DataMutator, layoutMutator?: LayoutMutator): Node[];
     /**
      * Find a node by it's token
-     *
      */
     findByToken(token: Token): Node | null;
     /**
      * Find a node by it's type (export class name without 'Node')
-     *
      */
     findByType<T>(type: {
         new (): T;
     }): Node;
     /**
      * Find a node by it's name (variables,modules,functions,actions)
-     *
      */
     findByName(name: string): Node;
     /**
      * Find a node by it's value (looks in values)
      *
-     *
      */
-    findByValue(value: Value): any;
+    findByValue(value: GenericValue): any;
     /**
      * Create a string with count whitespaces
-     *
      */
     indentToString(count: number): string;
     /**
      * Get string representation of children
-     *
      */
     childrenToString(indent: number, children: Array<Node>): any;
     /**
      * Get string representation of params
-     *
      */
     paramsToString(params: {}): string;
     /**
      * Get string representation of this node
-     *
      */
     toString(indent?: number, params?: {}, children?: Array<Node>): any;
     childrenToCode(indent: number, children: Array<Node>): any;
@@ -78,12 +70,10 @@ export declare class ParentNode extends Node {
     getChildren(): Node[];
     /**
      * Set the children of this node
-     *
      */
     setChildren(children: Array<Node>): this;
     /**
      * Get string representation of this node
-     *
      */
     toString(indent: number, params?: {}): any;
     toCode(indent?: number): any;
@@ -107,7 +97,6 @@ export declare class CommentNode extends Node {
     constructor(tokens: Array<Token>, text: string, multiline?: boolean);
     /**
      * Get string representation of this node
-     *
      */
     toString(indent?: number): any;
     toCode(indent?: number): string;
@@ -118,15 +107,13 @@ export declare class CommentNode extends Node {
  */
 export declare class VariableNode extends Node {
     name: string;
-    value: Value;
-    constructor(tokens: Array<Token>, name: string, value: Value);
+    value: GenericValue;
+    constructor(tokens: Array<Token>, name: string, value: GenericValue);
     /**
      * Find a node by it's token
-     *
      */
     /**
      * Get string representation of this node
-     *
      */
     toString(indent?: number): any;
     toCode(indent?: number): string;
@@ -137,8 +124,8 @@ export declare class VariableNode extends Node {
  */
 export declare class ParameterNode extends Node {
     name: string;
-    value: Value | null;
-    constructor(tokens: Array<Token>, name: string, value?: Value | null);
+    value: GenericValue | null;
+    constructor(tokens: Array<Token>, name: string, value?: GenericValue | null);
     toString(): string;
     toCode(): string;
 }
@@ -147,7 +134,7 @@ export declare class ParameterNode extends Node {
  *
  */
 export declare class ArgumentNode extends VariableNode {
-    constructor(tokens: Array<Token>, value: Value, name?: string | null);
+    constructor(tokens: Array<Token>, value: GenericValue, name?: string | null);
     toString(): string;
     toCode(): string;
 }
@@ -160,7 +147,6 @@ export declare class IncludeNode extends Node {
     constructor(tokens: Array<Token>, file: string);
     /**
      * Get string representation of this node
-     *
      */
     toString(indent?: number): any;
     toCode(indent?: number): string;
@@ -181,7 +167,6 @@ export declare class ModuleNode extends ParentNode {
     constructor(tokens: Array<Token>, name: any, params: ParameterNode[] | undefined, block: any);
     /**
      * Get string representation of this node
-     *
      */
     toString(indent?: number): any;
     toCode(indent?: number): string;
@@ -204,7 +189,6 @@ export declare class ActionNode extends ParentNode {
     constructor(tokens: Array<any>, name: string, args?: Array<ArgumentNode>);
     /**
      * Get string representation of this node
-     *
      */
     toString(indent?: number): any;
     toCode(indent?: number): string;
@@ -215,8 +199,8 @@ export declare class ActionNode extends ParentNode {
  */
 export declare class FunctionNode extends Node {
     params: Array<ParameterNode>;
-    expression: ExpressionNode | Value;
-    constructor(tokens: Array<Token>, name: string, params: Array<ParameterNode>, expression: ExpressionNode | Value);
+    expression: ExpressionNode | GenericValue;
+    constructor(tokens: Array<Token>, name: string, params: Array<ParameterNode>, expression: ExpressionNode | GenericValue);
     toString(indent?: number): any;
     toCode(indent?: number): string;
 }
@@ -225,14 +209,13 @@ export declare class FunctionNode extends Node {
  *
  */
 export declare class ExpressionNode extends Node {
-    leftExpression: ExpressionNode | Value;
-    rightExpression: ExpressionNode | Value | null;
+    leftExpression: ExpressionNode | GenericValue;
+    rightExpression: ExpressionNode | GenericValue | null;
     operator: string | null;
     negative: boolean;
-    constructor(tokens: Array<Token>, leftExpression: ExpressionNode | Value, rightExpression?: ExpressionNode | Value | null, operator?: string | null);
+    constructor(tokens: Array<Token>, leftExpression: ExpressionNode | GenericValue, rightExpression?: ExpressionNode | GenericValue | null, operator?: string | null);
     /**
      * Turn this expression negative
-     *
      */
     setNegative(neg: any): this;
     toString(): any;

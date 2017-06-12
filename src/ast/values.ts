@@ -5,13 +5,12 @@
 import * as _ from 'lodash';
 import { Token } from '../nearley/tokens';
 
-export type ValueType = number | string | boolean | Array<Value>;
 
 /**
  * Base value class
  * 
  */
-export class Value {
+export class Value<ValueType> {
     tokens: Array<Token>;
     value: ValueType;
     className: string;
@@ -27,7 +26,7 @@ export class Value {
      *
      *
      */
-    isEqual(value: Value) {
+    isEqual(value: GenericValue) {
         if (
             typeof value === typeof this
             && this.value === value.value
@@ -50,7 +49,9 @@ export class Value {
     }
 }
 
-export class SignedValue extends Value {
+export type GenericValue = Value<any>;
+
+export class SignedValue<ValueType> extends Value<ValueType> {
     negative: boolean = false;
 
     constructor(tokens: Array<Token>, value: ValueType) {
@@ -86,7 +87,7 @@ export class SignedValue extends Value {
  * Number type
  * 
  */
-export class NumberValue extends SignedValue {
+export class NumberValue extends SignedValue<number> {
     constructor(tokens: Array<Token>, value: number) {
         super(tokens, value);
         let instance: any = this.constructor;
@@ -99,7 +100,7 @@ export class NumberValue extends SignedValue {
  * Boolean type
  * 
  */
-export class BooleanValue extends Value {
+export class BooleanValue extends Value<boolean> {
     constructor(tokens: Array<Token>, value: boolean) {
         super(tokens, value);
         let instance: any = this.constructor;
@@ -112,7 +113,7 @@ export class BooleanValue extends Value {
  * String type
  * 
  */
-export class StringValue extends Value {
+export class StringValue extends Value<string> {
     constructor(tokens: Array<Token>, value: string) {
         super(tokens, value);
         let instance: any = this.constructor;
@@ -129,8 +130,8 @@ export class StringValue extends Value {
  * Vector type
  * 
  */
-export class VectorValue extends Value {
-    constructor(tokens: Array<Token>, value: Array<Value>) {
+export class VectorValue extends Value<Array<GenericValue>> {
+    constructor(tokens: Array<Token>, value: Array<GenericValue>) {
         super(tokens, value);
         let instance: any = this.constructor;
         this.className = instance.name;
@@ -140,10 +141,10 @@ export class VectorValue extends Value {
      * Check if values are equal
      * 
      */
-    isEqual(value: Value) {
+    isEqual(value: GenericValue) {
         let out = false;
         if (value instanceof VectorValue) {
-            out = (this.value as Array<Value>).length > 0;
+            out = (this.value as Array<GenericValue>).length > 0;
             _.each(this.value, (val, key) => {
                 if (!val.isEqual(value.value[key])) {
                     out = false;
@@ -155,7 +156,7 @@ export class VectorValue extends Value {
     }
 
     toString() {
-        return `[${_.map((this.value as Array<Value>), (value: any) => value.toString()).join(', ')}]`;
+        return `[${_.map((this.value as Array<GenericValue>), (value: any) => value.toString()).join(', ')}]`;
     }
 
     toCode() {
@@ -168,12 +169,12 @@ export class VectorValue extends Value {
  * Range type
  * 
  */
-export class RangeValue extends Value {
-    start: Value;
-    end: Value;
-    increment: Value;
+export class RangeValue extends Value<any> {
+    start: Value<number>;
+    end: Value<number>;
+    increment: Value<number>;
 
-    constructor(tokens: Array<Token>, start: Value, end: Value, increment: Value = new NumberValue([], 1)) {
+    constructor(tokens: Array<Token>, start: Value<number>, end: Value<number>, increment: Value<number> = new NumberValue([], 1)) {
         super(tokens, [start, increment, end]);
         this.start = start;
         this.end = end;
@@ -186,7 +187,7 @@ export class RangeValue extends Value {
      * Check if values are equal
      * 
      */
-    isEqual(value: Value) {
+    isEqual(value: GenericValue) {
         if (
             value instanceof RangeValue
             && this.start.isEqual(value.start)
@@ -211,7 +212,7 @@ export class RangeValue extends Value {
  * Reference type
  * 
  */
-export class ReferenceValue extends SignedValue {
+export class ReferenceValue extends SignedValue<any> {
     constructor(tokens: Array<Token>, reference: string) {
         super(tokens, reference);
         let instance: any = this.constructor;
@@ -222,7 +223,7 @@ export class ReferenceValue extends SignedValue {
      * Check if values are equal
      * 
      */
-    isEqual(value: Value) {
+    isEqual(value: GenericValue) {
         if (
             value instanceof ReferenceValue
             && this.negative === value.negative

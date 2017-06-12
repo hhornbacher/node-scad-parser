@@ -1,21 +1,21 @@
 /**
  * Abstract syntax representation of the scad language
- *
  */
-/*import * as _ from 'lodash';
-import { inspect } from 'util';*/
 
 import { Token } from '../nearley/tokens';
 
+/**
+ * Values
+ */
 export * from './values';
+
+/**
+ * Syntax nodes
+ */
 export * from './nodes';
 
 /**
- * Location in the code
- * 
- *
- * 
- *
+ * A Location in the code
  */
 export class Location {
     offset: number;
