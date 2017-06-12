@@ -22,6 +22,7 @@
     "lodash": "^4.17.4",
     "moo": "^0.3.2",
     "nearley": "^2.10.0",
+    "tmp": "0.0.31",
     "tree-morph": "^0.2.1"
   },
   "devDependencies": {
@@ -54,5 +55,6 @@
     "parser",
     "lexer",
     "ast"
-  ]
+  ],
+  "false": {}
 }
