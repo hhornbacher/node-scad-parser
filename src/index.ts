@@ -124,22 +124,24 @@ export default class SCADParser {
    * Render the supplied code (with OpenSCAD)
    * 
    */
-  render(code: string | null, file: string | null, options: any = {}): Promise<string> {
+  async render(code: string | null, file: string | null, options: any = {}): Promise<string | Buffer> {
 
-    const execRenderer = (options: { [key: string]: any }) => {
-      return util.tmpName({
-        postfix: '.stl'
-      })
-        .then(path => {
-          const args = ` -o ${path}`
-            + (options.colorScheme ? ' --colorscheme=' + options.colorScheme : '')
-            + ' ' + options.inputFile;
-          return util.exec(
-            options.binaryPath
-            + args
-          )
-            .then(() => util.readFile(path, 'utf8'));
+    const execRenderer = async (options: { [key: string]: any }) => {
+      try {
+        const path = await util.tmpName({
+          postfix: '.stl'
         });
+        const args = ` -o ${path}`
+          + (options.colorScheme ? ' --colorscheme=' + options.colorScheme : '')
+          + ' ' + options.inputFile;
+        await util.exec(
+          options.binaryPath
+          + args
+        );
+        return util.readFile(path, 'utf8');
+      } catch (err) {
+        throw err;
+      }
     };
 
     let _options = {
@@ -150,29 +152,29 @@ export default class SCADParser {
     };
 
     if (file) {
-      return execRenderer({
-        ..._options,
-        inputFile: file
-      })
-        .catch(err => {
-          console.log(err);
+      try {
+        return await execRenderer({
+          ..._options,
+          inputFile: file
         });
+      } catch (err) {
+        console.log(err);
+      }
     }
     else if (code) {
-      return util.tmpName({
+      const path = await util.tmpName({
         postfix: '.scad'
-      }).then(path => {
-        return util.writeFile(path, code)
-          .then(() => {
-            return execRenderer({
-              ..._options,
-              inputFile: path
-            })
-              .catch(err => {
-                console.log(err);
-              });
-          });
       });
+      await util.writeFile(path, code);
+
+      try {
+        return await execRenderer({
+          ..._options,
+          inputFile: path
+        });
+      } catch (err) {
+        console.log(err);
+      }
     }
 
     throw new Error('Neither code or file supplied!');

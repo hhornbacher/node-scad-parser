@@ -1,3 +1,4 @@
+/// <reference types="node" />
 import { Token } from './nearley/tokens';
 import { RootNode, Location } from './ast';
 /**
@@ -24,7 +25,7 @@ export default class SCADParser {
      * Render the supplied code (with OpenSCAD)
      *
      */
-    render(code: string | null, file: string | null, options?: any): Promise<string>;
+    render(code: string | null, file: string | null, options?: any): Promise<string | Buffer>;
     /**
      * Parse the abstract syntax tree
      *
