@@ -31,8 +31,12 @@ import {
 const {
     include,
     use,
+	ifToken,
+	elseToken,
     moduleDefinition,
     functionDefinition,
+    forLoopDefinition,
+    intersectionForLoopDefinition,
     actionCall,
     comment,
     mlComment,
@@ -76,6 +80,7 @@ Statement ->
 	| %use %eos {% d => new UseNode(pickTokens(d), d[0].value) %}
 	| %moduleDefinition %rparent %lblock Block %rblock {% d => new ModuleNode(pickTokens(d), d[0].value, [], d[3]) %}
 	| %moduleDefinition Parameters %rparent %lblock Block %rblock {% d => new ModuleNode(pickTokens(d), d[0].value, d[1], d[4]) %}
+	| %forLoopDefinition Parameters %rparent %lblock Block %rblock {% d => new ModuleNode(pickTokens(d), d[0].value, d[1], d[4]) %}
 	| %functionDefinition %rparent %assign Expression %eos {% d => new FunctionNode(pickTokens(d), d[0].value, [], d[3]) %}
 	| %functionDefinition Parameters %rparent %assign Expression %eos {% d => new FunctionNode(pickTokens(d), d[0].value, d[1], d[4]) %}
 	| %identifier %assign Expression %eos {% d => new VariableNode(pickTokens(d), d[0].value, d[2]) %}

@@ -18,8 +18,12 @@ interface Token {
 const tokens: { [key: string]: string | Array<string> | { match: RegExp, lineBreaks: boolean } | RegExp } = {
     include: { match: /include\s*<(.+)>/, lineBreaks: true },
     use: { match: /use\s*<(.+)>/, lineBreaks: true },
+    ifToken: 'if',
+    elseToken: 'else',
     moduleDefinition: { match: /module\s*([A-Za-z_$][A-Za-z0-9_]*)\s*\(/, lineBreaks: true },
     functionDefinition: { match: /function\s*([A-Za-z_$][A-Za-z0-9_]*)\s*\(/, lineBreaks: true },
+    forLoopDefinition: { match: /for\s*\(/, lineBreaks: true },
+    intersectionForLoopDefinition: { match: /intersection_for\s*\(/, lineBreaks: true },
     actionCall: { match: /([!#\*\%]?[A-Za-z][A-Za-z0-9_]*)\s*\(/, lineBreaks: true },
     comment: { match: /\/\/(.*)\n/, lineBreaks: true },
     mlComment: { match: /\/\*([^]*?)\*\//, lineBreaks: true },
