@@ -8,7 +8,7 @@
   "types": "lib/index",
   "scripts": {
     "prepare": "npm run build",
-    "build:live": "nodemon -e ts --ignore lib/ --exec 'tsc --pretty'",
+    "build:live": "nodemon -e ts --ignore lib/ --exec 'tsc --pretty ; exit 0'",
     "build": "npm run test:default && npm run build:grammar && npm run build:lib",
     "build:grammar": "nearleyc src/nearley/grammar.ne > src/nearley/grammar.ts 2> src/nearley/grammar.err && rm -f src/nearley/grammar.err",
     "build:docs": "typedoc --out ./docs/ --name 'SCADParser' --readme ./README.md --module commonjs --target es5 --exclude '**/test.ts'",
