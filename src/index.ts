@@ -1,4 +1,5 @@
 import * as fs from 'fs';
+import * as path from 'path';
 import * as repl from 'repl';
 import * as _ from 'lodash';
 import * as moo from 'moo';
@@ -44,7 +45,7 @@ export default class SCADParser {
     const _context = {
       ...context,
       parser,
-      testRender: () => parser.render(null, '/home/harry/Dokumente/Development/Private/3D/thermostirrer/coil-holder.scad').then(out => console.log(out))
+      testRender: () => parser.render(null, path.resolve(__dirname, '../examples/coil-holder.scad')).then(out => console.log(out))
     };
 
     console.log(
